@@ -13,6 +13,7 @@
   --color-accent-text: #ffffff;  /* text on top of the accent color */
   --color-border: #7b8794;       /* input and card outlines */
   --color-focus: #b8500a;        /* keyboard focus ring */
+  --color-backdrop: rgba(31, 41, 51, 0.6);   /* dims the page behind Settings */
 
   /* Fonts */
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -315,10 +316,82 @@ input[type="number"] {
 }
 
 /* ==========================================================
-   8. REDUCED MOTION
-   If the user's device asks for less motion, switch off
-   animations and transitions everywhere.
+   8. SETTINGS
    ========================================================== */
+
+/* App name on the left, Settings button on the right. */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+dialog {
+  width: calc(100% - 2 * var(--space-medium));
+  max-width: 28rem;
+  padding: var(--space-large);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+/* The dimmed page behind the open pop-up. */
+dialog::backdrop {
+  background: var(--color-backdrop);
+}
+
+dialog h2 {
+  margin: 0 0 var(--space-medium);
+  font-size: var(--font-size-large);
+}
+
+fieldset {
+  margin: 0 0 var(--space-medium);
+  padding: var(--space-small) var(--space-medium);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+legend {
+  padding: 0 var(--space-small);
+  font-weight: 600;
+}
+
+/* A checkbox with its words beside it. */
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-small);
+  min-height: var(--control-height);
+  margin: 0;
+  font-weight: 400;
+}
+
+input[type="checkbox"] {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  accent-color: var(--color-accent);
+}
+
+/* Greyed out while plain mode is on. */
+fieldset:disabled {
+  color: var(--color-text-muted);
+}
+
+/* ==========================================================
+   9. MOTION OFF
+   Animations and transitions are switched off everywhere when
+   (a) the user's device asks for less motion, or
+   (b) the user turned animation off in Settings. app.js then adds
+       the class "no-animation" to <body>.
+   ========================================================== */
+.no-animation * {
+  animation: none !important;
+  transition: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

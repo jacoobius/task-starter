@@ -13,6 +13,7 @@
 
   <header class="site-header">
     <p class="app-name">Task Starter</p>
+    <button type="button" id="settings-open" class="button button-quiet">Settings</button>
   </header>
 
   <!--
@@ -123,6 +124,40 @@
     </section>
 
   </main>
+
+  <!--
+    Settings pop-up. <dialog> is built into the browser: it keeps
+    keyboard focus inside while open, closes on Escape, and returns
+    focus to the Settings button afterwards.
+  -->
+  <dialog id="settings-dialog" aria-labelledby="settings-heading">
+    <h2 id="settings-heading">Settings</h2>
+
+    <!-- A disabled fieldset disables every checkbox inside it. app.js
+         disables this one while plain mode is on. -->
+    <fieldset id="reward-settings">
+      <legend>When you finish a step</legend>
+      <label class="check-label">
+        <input type="checkbox" id="setting-sound"> Play a sound
+      </label>
+      <label class="check-label">
+        <input type="checkbox" id="setting-animation"> Show animation
+      </label>
+      <label class="check-label">
+        <input type="checkbox" id="setting-rewards"> Show rewards (check mark, kind message, progress bar)
+      </label>
+    </fieldset>
+
+    <label class="check-label">
+      <input type="checkbox" id="setting-plain" aria-describedby="plain-hint"> Plain mode
+    </label>
+    <p id="plain-hint" class="hint">Turns off all three above at once.</p>
+
+    <!-- method="dialog" makes this button close the pop-up. -->
+    <form method="dialog">
+      <button type="submit" class="button button-primary">Close</button>
+    </form>
+  </dialog>
 
   <script src="app.js"></script>
 </body>

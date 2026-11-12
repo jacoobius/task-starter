@@ -19,11 +19,22 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 4  | Save and load the task and steps with localStorage | done | claude/storage |
 | 5  | Screen 3: large countdown timer for one step (user-chosen length, default 10 minutes) | done | claude/timer |
 | 6  | Completion: gentle feedback, progress ("3 of 5 steps done"), offer the next step | done | claude/completion |
-| 7  | Settings: toggles for sound, animation, rewards, plus one switch that turns all rewards off | todo | |
+| 7  | Settings: toggles for sound, animation, rewards, plus one switch that turns all rewards off | done | claude/settings |
 | 8  | Accessibility pass: keyboard navigation, visible focus, AA contrast, reduced motion, ARIA labels | todo | |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 7, settings (Claude): a Settings button in the header opens a
+  pop-up (the browser's built-in <dialog>) with four checkboxes: sound,
+  animation, rewards, and plain mode. Settings are saved with everything
+  else. One function, isOn(name), is the only place that decides whether a
+  reward happens, and it always answers "no" in plain mode, so plain mode
+  can't miss anything. For A/B testing: plain mode on = no sound, no
+  animation, no check mark, no kind message, no progress bar.
+  Decision to check with Jacob: the progress sentence ("3 of 5 steps
+  done") stays visible even in plain mode, because it is information the
+  user needs, not a reward. Only the bar is treated as a reward.
 
 - Task 6, completion (Claude): added a fourth screen, "Step done", shown
   after "I finished this step". It has a check mark that grows into place

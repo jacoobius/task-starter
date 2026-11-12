@@ -10,7 +10,13 @@ const state = {
   task: "",           // the task the user is avoiding
   steps: [],          // the steps, in order. Each is { id, text, done }
   nextStepId: 1,      // id to give the next new step, so every id is unique
-  timerMinutes: 10    // the timer length the user last chose
+  timerMinutes: 10,   // the timer length the user last chose
+  settings: {
+    sound: true,      // play the chime
+    animation: true,  // animate the check mark
+    rewards: true,    // show the check mark, kind message and progress bar
+    plainMode: false  // true = all three above count as off
+  }
 };
 
 // ==========================================================
@@ -35,6 +41,12 @@ function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (saved) {
+      // "settings" is an object inside state, so copy its values one
+      // level down. Copying it whole would replace our defaults and
+      // lose any setting that was added after the user last saved.
+      Object.assign(state.settings, saved.settings);
+      delete saved.settings;
+
       Object.assign(state, saved);
     }
   } catch (error) {
@@ -581,8 +593,19 @@ function openDoneScreen() {
     document.getElementById("done-next").textContent = "Start a new task";
   }
 
+  showOrHideRewards();
   showScreen("screen-done");
   playChime();
+}
+
+// The check mark, kind message and progress bar are "rewards". Hide
+// them when rewards are off. The heading, the progress sentence and
+// the next-step button always stay, so the screen still works.
+function showOrHideRewards() {
+  const rewardsOff = !isOn("rewards");
+  document.getElementById("done-check").hidden = rewardsOff;
+  document.getElementById("done-message").hidden = rewardsOff;
+  document.getElementById("done-bar").hidden = rewardsOff;
 }
 
 document.getElementById("done-next").addEventListener("click", function () {
@@ -608,6 +631,10 @@ document.getElementById("done-back").addEventListener("click", openStepsScreen);
 let audioContext = null;   // created the first time a sound is played
 
 function playChime() {
+  if (!isOn("sound")) {
+    return;
+  }
+
   try {
     if (audioContext === null) {
       audioContext = new AudioContext();
@@ -639,11 +666,66 @@ function playNote(frequency, delay) {
 }
 
 // ==========================================================
+// SETTINGS
+// Three switches (sound, animation, rewards) plus "plain mode", which
+// overrides all three. Plain mode exists for A/B testing: the same app
+// with and without rewards.
+// ==========================================================
+
+// Is a setting switched on? Always false while plain mode is on.
+// Every reward in the app asks this function before doing anything.
+// Example: isOn("sound")
+function isOn(name) {
+  return !state.settings.plainMode && state.settings[name];
+}
+
+// Which checkbox in index.html belongs to which setting.
+const SETTING_CHECKBOXES = {
+  sound: "setting-sound",
+  animation: "setting-animation",
+  rewards: "setting-rewards",
+  plainMode: "setting-plain"
+};
+
+// Make the page match state.settings.
+function applySettings() {
+  // Tick or untick each checkbox.
+  for (const name in SETTING_CHECKBOXES) {
+    const checkbox = document.getElementById(SETTING_CHECKBOXES[name]);
+    checkbox.checked = state.settings[name];
+  }
+
+  // In plain mode, grey out the three switches it overrides.
+  document.getElementById("reward-settings").disabled = state.settings.plainMode;
+
+  // styles.css switches off all animation while <body> has this class.
+  document.body.classList.toggle("no-animation", !isOn("animation"));
+
+  showOrHideRewards();
+}
+
+// When a checkbox is ticked or unticked: remember it, save, and apply.
+for (const name in SETTING_CHECKBOXES) {
+  const checkbox = document.getElementById(SETTING_CHECKBOXES[name]);
+
+  checkbox.addEventListener("change", function () {
+    state.settings[name] = checkbox.checked;
+    saveState();
+    applySettings();
+  });
+}
+
+document.getElementById("settings-open").addEventListener("click", function () {
+  document.getElementById("settings-dialog").showModal();
+});
+
+// ==========================================================
 // START THE APP
 // This runs once, when the page opens. Keep it at the bottom of the
 // file so everything above already exists.
 // ==========================================================
 loadState();
+applySettings();
 
 // If a task was saved earlier, skip screen 1 and carry on from the steps.
 if (state.task !== "") {
