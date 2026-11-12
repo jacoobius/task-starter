@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task Starter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Lets keyboard users jump straight past the header. -->
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <p class="app-name">Task Starter</p>
+  </header>
+
+  <!--
+    The app has three screens. Only one is visible at a time.
+    app.js shows a screen by removing its "hidden" attribute
+    and adding "hidden" to the others.
+  -->
+  <main id="main">
+
+    <!-- Screen 1: type the task you're avoiding (built in task 2) -->
+    <section id="screen-task" class="screen" aria-labelledby="heading-task">
+      <h1 id="heading-task" tabindex="-1">What's one task you've been avoiding?</h1>
+    </section>
+
+    <!-- Screen 2: break the task into small steps (built in task 3) -->
+    <section id="screen-steps" class="screen" aria-labelledby="heading-steps" hidden>
+      <h1 id="heading-steps" tabindex="-1">Break it into small steps</h1>
+    </section>
+
+    <!-- Screen 3: countdown timer for one step (built in task 5) -->
+    <section id="screen-timer" class="screen" aria-labelledby="heading-timer" hidden>
+      <h1 id="heading-timer" tabindex="-1">Just this one step</h1>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -13,7 +13,7 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 
 | #  | Task | Status | Branch |
 |----|------|--------|--------|
-| 1  | Page skeleton: index.html, styles.css, app.js, with all colors and fonts as CSS variables in one place | todo | |
+| 1  | Page skeleton: index.html, styles.css, app.js, with all colors and fonts as CSS variables in one place | done | claude/page-skeleton |
 | 2  | Screen 1: type one task you're avoiding | todo | |
 | 3  | Screen 2: break the task into steps (add, edit, reorder, delete) | todo | |
 | 4  | Save and load the task and steps with localStorage | todo | |
@@ -24,6 +24,16 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 1, page skeleton (Claude): added index.html, styles.css and app.js.
+  index.html has the three screens (task, steps, timer) as empty sections
+  with only the first one visible. styles.css starts with one block of CSS
+  variables holding every color, font and spacing value, so the look can be
+  changed in one place; it also has the focus ring, the skip link and the
+  reduced-motion rule. app.js has one function, showScreen(id), which shows
+  one screen, hides the others and moves focus to the new heading so
+  keyboard and screen-reader users notice the change. No screen does
+  anything yet; that is tasks 2 to 6.
 
 - Project setup (Claude): created AGENTS.md, CLAUDE.md and this PLAN.md, and
   initialised git, so both agents share the same rules and task list.

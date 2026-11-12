@@ -1,0 +1,110 @@
+/* ==========================================================
+   1. DESIGN TOKENS
+   Every color, font and spacing value lives here.
+   To restyle the app, change these and nothing else.
+   ========================================================== */
+:root {
+  /* Colors (all text/background pairs meet WCAG AA contrast) */
+  --color-background: #fbf9f4;   /* warm off-white page */
+  --color-surface: #ffffff;      /* cards and inputs */
+  --color-text: #1f2933;         /* main text */
+  --color-text-muted: #52606d;   /* secondary text */
+  --color-accent: #1d5c63;       /* buttons and links */
+  --color-accent-text: #ffffff;  /* text on top of the accent color */
+  --color-border: #7b8794;       /* input and card outlines */
+  --color-focus: #b8500a;        /* keyboard focus ring */
+
+  /* Fonts */
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-size-base: 1.125rem;    /* 18px: comfortable reading size */
+  --font-size-large: 1.75rem;    /* screen headings */
+  --line-height: 1.5;
+
+  /* Spacing and shape */
+  --space-small: 0.5rem;
+  --space-medium: 1rem;
+  --space-large: 2rem;
+  --radius: 0.5rem;
+  --content-width: 36rem;        /* keeps lines short and readable */
+}
+
+/* ==========================================================
+   2. BASE STYLES
+   ========================================================== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
+}
+
+h1 {
+  font-size: var(--font-size-large);
+  line-height: 1.25;
+  margin: 0 0 var(--space-medium);
+}
+
+/* A clear focus ring on anything reached with the keyboard. */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* ==========================================================
+   3. LAYOUT
+   ========================================================== */
+.site-header,
+main {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: var(--space-medium);
+}
+
+.app-name {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.screen {
+  padding-top: var(--space-large);
+}
+
+/* The "hidden" attribute hides inactive screens. This rule makes sure
+   no later style accidentally overrides it. */
+[hidden] {
+  display: none !important;
+}
+
+/* Skip link: off-screen until it receives keyboard focus. */
+.skip-link {
+  position: absolute;
+  left: var(--space-medium);
+  top: -4rem;
+  padding: var(--space-small) var(--space-medium);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  border-radius: var(--radius);
+}
+
+.skip-link:focus {
+  top: var(--space-small);
+}
+
+/* ==========================================================
+   4. REDUCED MOTION
+   If the user's device asks for less motion, switch off
+   animations and transitions everywhere.
+   ========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
