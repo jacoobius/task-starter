@@ -13,6 +13,35 @@ const state = {
 };
 
 // ==========================================================
+// SAVING
+// The state object is saved in the browser's localStorage as text
+// (JSON), so the task and steps are still there after a reload.
+// ==========================================================
+const STORAGE_KEY = "task-starter";
+
+// Call this after every change to "state".
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    // Storage can be blocked or full (e.g. private browsing). The app
+    // still works; it just won't remember things after a reload.
+  }
+}
+
+// Copy any saved values into "state". Runs once, when the page opens.
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved) {
+      Object.assign(state, saved);
+    }
+  } catch (error) {
+    // Nothing saved yet, or the saved text is damaged: start fresh.
+  }
+}
+
+// ==========================================================
 // HELPERS
 // ==========================================================
 
@@ -63,6 +92,7 @@ taskForm.addEventListener("submit", function (event) {
   }
 
   state.task = text;
+  saveState();
   openStepsScreen();
 });
 
@@ -115,9 +145,10 @@ function renderSteps() {
   });
 }
 
-// Call this after any change to the steps: redraw the list and tell
-// screen-reader users what happened.
+// Call this after any change to the steps: save, redraw the list and
+// tell screen-reader users what happened.
 function stepsChanged(message) {
+  saveState();
   renderSteps();
   announce(message);
 }
@@ -297,3 +328,15 @@ stepForm.addEventListener("submit", function (event) {
   stepInput.focus();
   stepsChanged("Step added: " + text);
 });
+
+// ==========================================================
+// START THE APP
+// This runs once, when the page opens. Keep it at the bottom of the
+// file so everything above already exists.
+// ==========================================================
+loadState();
+
+// If a task was saved earlier, skip screen 1 and carry on from the steps.
+if (state.task !== "") {
+  openStepsScreen();
+}

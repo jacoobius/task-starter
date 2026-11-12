@@ -16,7 +16,7 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 1  | Page skeleton: index.html, styles.css, app.js, with all colors and fonts as CSS variables in one place | done | claude/page-skeleton |
 | 2  | Screen 1: type one task you're avoiding | done | claude/task-entry |
 | 3  | Screen 2: break the task into steps (add, edit, reorder, delete) | done | claude/steps |
-| 4  | Save and load the task and steps with localStorage | todo | |
+| 4  | Save and load the task and steps with localStorage | done | claude/storage |
 | 5  | Screen 3: large countdown timer for one step (user-chosen length, default 10 minutes) | todo | |
 | 6  | Completion: gentle feedback, progress ("3 of 5 steps done"), offer the next step | todo | |
 | 7  | Settings: toggles for sound, animation, rewards, plus one switch that turns all rewards off | todo | |
@@ -24,6 +24,12 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 4, saving (Claude): the whole state object is saved to localStorage
+  as JSON under the key "task-starter" after every change (saveState), and
+  read back once when the page opens (loadState). If a task was saved, the
+  app opens straight on the steps screen. Both functions use try/catch so
+  the app still works when storage is blocked; it just won't remember.
 
 - Task 3, steps screen (Claude): screen 2 now has an "Add a step" box and a
   numbered list. Each step has Edit, Up, Down and Delete buttons. Steps
