@@ -16,20 +16,39 @@
   </header>
 
   <!--
+    Invisible message area for screen readers. app.js writes short
+    messages here ("Step added") and screen readers speak them.
+  -->
+  <p id="status" class="visually-hidden" role="status"></p>
+
+  <!--
     The app has three screens. Only one is visible at a time.
     app.js shows a screen by removing its "hidden" attribute
     and adding "hidden" to the others.
   -->
   <main id="main">
 
-    <!-- Screen 1: type the task you're avoiding (built in task 2) -->
+    <!-- Screen 1: type the task you're avoiding -->
     <section id="screen-task" class="screen" aria-labelledby="heading-task">
       <h1 id="heading-task" tabindex="-1">What's one task you've been avoiding?</h1>
+
+      <form id="task-form">
+        <label for="task-input">Your task</label>
+        <input type="text" id="task-input" autocomplete="off" maxlength="120"
+               required aria-describedby="task-hint">
+        <p id="task-hint" class="hint">Just one. It can be small.</p>
+        <button type="submit" class="button button-primary">Next: break it down</button>
+      </form>
     </section>
 
-    <!-- Screen 2: break the task into small steps (built in task 3) -->
+    <!-- Screen 2: break the task into small steps -->
     <section id="screen-steps" class="screen" aria-labelledby="heading-steps" hidden>
       <h1 id="heading-steps" tabindex="-1">Break it into small steps</h1>
+
+      <p class="task-name">
+        Task: <strong id="steps-task-name"></strong>
+        <button type="button" id="change-task" class="button button-quiet">Change task</button>
+      </p>
     </section>
 
     <!-- Screen 3: countdown timer for one step (built in task 5) -->

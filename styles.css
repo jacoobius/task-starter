@@ -25,6 +25,7 @@
   --space-medium: 1rem;
   --space-large: 2rem;
   --radius: 0.5rem;
+  --control-height: 2.75rem;     /* 44px: easy to click or tap */
   --content-width: 36rem;        /* keeps lines short and readable */
 }
 
@@ -97,8 +98,82 @@ main {
   top: var(--space-small);
 }
 
+/* Hidden from sight but still read out by screen readers. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* ==========================================================
-   4. REDUCED MOTION
+   4. FORMS AND BUTTONS
+   ========================================================== */
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--space-small);
+}
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--space-small) var(--space-medium);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.hint {
+  margin: var(--space-small) 0 0;
+  color: var(--color-text-muted);
+}
+
+/* Standard button: outlined. */
+.button {
+  min-height: var(--control-height);
+  padding: var(--space-small) var(--space-medium);
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: var(--color-surface);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+/* Primary button: the one main action on a screen. Filled and full width. */
+.button-primary {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-large);
+  color: var(--color-accent-text);
+  background: var(--color-accent);
+}
+
+/* Quiet button: for less important actions. Looks like a link. */
+.button-quiet {
+  background: transparent;
+  border-color: transparent;
+  text-decoration: underline;
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.task-name {
+  margin: 0 0 var(--space-large);
+}
+
+/* ==========================================================
+   5. REDUCED MOTION
    If the user's device asks for less motion, switch off
    animations and transitions everywhere.
    ========================================================== */

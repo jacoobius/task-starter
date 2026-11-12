@@ -14,7 +14,7 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | #  | Task | Status | Branch |
 |----|------|--------|--------|
 | 1  | Page skeleton: index.html, styles.css, app.js, with all colors and fonts as CSS variables in one place | done | claude/page-skeleton |
-| 2  | Screen 1: type one task you're avoiding | todo | |
+| 2  | Screen 1: type one task you're avoiding | done | claude/task-entry |
 | 3  | Screen 2: break the task into steps (add, edit, reorder, delete) | todo | |
 | 4  | Save and load the task and steps with localStorage | todo | |
 | 5  | Screen 3: large countdown timer for one step (user-chosen length, default 10 minutes) | todo | |
@@ -24,6 +24,13 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 2, task entry screen (Claude): screen 1 now has a labelled text box
+  and one button, "Next: break it down". Submitting saves the text in a
+  single "state" object in app.js and opens screen 2, which shows the task
+  name and a "Change task" button to go back. Added shared styles for
+  inputs and three button looks (normal, primary, quiet), and an invisible
+  status line that app.js uses to speak short messages to screen readers.
 
 - Task 1, page skeleton (Claude): added index.html, styles.css and app.js.
   index.html has the three screens (task, steps, timer) as empty sections
