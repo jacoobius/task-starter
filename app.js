@@ -61,7 +61,15 @@ function loadState() {
 // Speak a short message to screen-reader users. It writes the text into
 // the invisible #status element, which screen readers read out.
 function announce(message) {
-  document.getElementById("status").textContent = message;
+  const status = document.getElementById("status");
+
+  // Empty it first, then add the text a moment later. Screen readers
+  // only speak when the text changes, so without this the same message
+  // twice in a row ("Step deleted." twice) would be silent the second time.
+  status.textContent = "";
+  setTimeout(function () {
+    status.textContent = message;
+  }, 50);
 }
 
 // ==========================================================
@@ -239,7 +247,13 @@ function buildStepRow(step, index) {
     deleteStep(step.id);
   });
 
-  row.append(text, editButton, upButton, downButton, deleteButton);
+  // Keep the four buttons in one group, so on a narrow screen they all
+  // wrap to the next line together.
+  const buttons = document.createElement("div");
+  buttons.className = "step-buttons";
+  buttons.append(editButton, upButton, downButton, deleteButton);
+
+  row.append(text, buttons);
   return row;
 }
 

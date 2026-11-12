@@ -54,10 +54,19 @@ h1 {
   margin: 0 0 var(--space-medium);
 }
 
-/* A clear focus ring on anything reached with the keyboard. */
+/* A clear focus ring on anything reached with the keyboard. The gap
+   (offset) means the ring always sits on the page color, where it has
+   good contrast, even around a dark button. */
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 3px;
+}
+
+/* app.js moves focus to the heading when the screen changes, so screen
+   readers read it. A heading can't be clicked or typed in, so it
+   doesn't need a ring. */
+h1:focus {
+  outline: none;
 }
 
 /* ==========================================================
@@ -211,6 +220,11 @@ input[type="number"] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: var(--space-small);
+}
+
+.step-buttons {
+  display: flex;
   gap: var(--space-small);
 }
 

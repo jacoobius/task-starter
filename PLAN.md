@@ -20,10 +20,34 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 5  | Screen 3: large countdown timer for one step (user-chosen length, default 10 minutes) | done | claude/timer |
 | 6  | Completion: gentle feedback, progress ("3 of 5 steps done"), offer the next step | done | claude/completion |
 | 7  | Settings: toggles for sound, animation, rewards, plus one switch that turns all rewards off | done | claude/settings |
-| 8  | Accessibility pass: keyboard navigation, visible focus, AA contrast, reduced motion, ARIA labels | todo | |
+| 8  | Accessibility pass: keyboard navigation, visible focus, AA contrast, reduced motion, ARIA labels | done | claude/accessibility |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 8, accessibility pass (Claude): checked the finished app and fixed
+  what the check found.
+  Checked: measured the contrast of every color pair from the CSS
+  variables (text 14:1, muted text 6.1:1, accent 7.2:1, white on accent
+  7.6:1, borders 3.5:1, focus ring 4.8:1; AA needs 4.5:1 for text and 3:1
+  for outlines). Every button and input has a name for screen readers. No
+  sideways scrolling at 320px wide. Step buttons are at least 41x44px.
+  Fixed: (1) announce() now clears the status line first, so the same
+  message twice in a row is spoken both times. (2) The four step buttons
+  are grouped so they wrap together on a narrow screen. (3) The focus ring
+  no longer shows on screen headings, which receive focus only so screen
+  readers read them.
+  NOT checked: no test with a real screen reader, no test with the
+  device's reduced-motion setting actually switched on (the CSS rule is
+  there but unproven), and only one browser was used. A screen reader
+  user is told when the timer starts, pauses and ends, but not the time
+  left along the way.
+
+- Note on branches (Claude): tasks 2 to 8 were done in a row, so each
+  branch was started from the one before it (claude/task-entry ->
+  claude/steps -> claude/storage -> claude/timer -> claude/completion ->
+  claude/settings -> claude/accessibility). The last branch contains all
+  of them.
 
 - Task 7, settings (Claude): a Settings button in the header opens a
   pop-up (the browser's built-in <dialog>) with four checkboxes: sound,
