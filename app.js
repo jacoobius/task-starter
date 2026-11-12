@@ -57,7 +57,7 @@ function announce(message) {
 // ==========================================================
 
 // The ids of the screens in index.html.
-const SCREEN_IDS = ["screen-task", "screen-steps", "screen-timer"];
+const SCREEN_IDS = ["screen-task", "screen-steps", "screen-timer", "screen-done"];
 
 // Show one screen and hide the others.
 // Example: showScreen("screen-steps")
@@ -144,6 +144,11 @@ function renderSteps() {
 
     list.append(item);
   });
+
+  // Show progress, e.g. "3 of 5 steps done", once there are steps.
+  const progress = document.getElementById("steps-progress");
+  progress.textContent = progressText();
+  progress.hidden = (state.steps.length === 0);
 
   // The main button starts the first step that isn't done yet.
   // It is hidden when there is no such step.
@@ -480,6 +485,7 @@ function timeIsUp() {
   timerPauseButton.hidden = true;
   timerMoreButton.hidden = false;
   announce("Time's up.");
+  playChime();
 }
 
 timerPauseButton.addEventListener("click", function () {
@@ -511,7 +517,7 @@ document.getElementById("timer-done").addEventListener("click", function () {
   findStep(currentStepId).done = true;
   saveState();
   leaveTimer();
-  openStepsScreen();
+  openDoneScreen();
 });
 
 // "Back to steps" leaves the step exactly as it was. It is not marked
@@ -520,6 +526,117 @@ document.getElementById("timer-back").addEventListener("click", function () {
   leaveTimer();
   openStepsScreen();
 });
+
+// ==========================================================
+// SCREEN 4: STEP DONE
+// Gentle feedback only: a check mark, a kind sentence, a soft sound
+// and the progress count. No points, streaks or scores.
+// ==========================================================
+
+// One of these is shown each time a step is finished.
+const DONE_MESSAGES = [
+  "Nice work. That's one step out of the way.",
+  "Done. Getting started is the hard part, and you did it.",
+  "That one's finished. Well done."
+];
+
+// How many steps are finished.
+function countDone() {
+  return state.steps.filter(function (step) {
+    return step.done;
+  }).length;
+}
+
+// The progress sentence, e.g. "3 of 5 steps done".
+function progressText() {
+  const total = state.steps.length;
+  const word = (total === 1) ? "step" : "steps";
+  return countDone() + " of " + total + " " + word + " done";
+}
+
+function openDoneScreen() {
+  const doneCount = countDone();
+  const step = nextStep();   // undefined when every step is done
+
+  // Take the messages in turn. "%" is the remainder after dividing, so
+  // the position goes 1, 2, 0, 1, 2, 0... and never runs off the end.
+  let message = DONE_MESSAGES[doneCount % DONE_MESSAGES.length];
+  if (!step) {
+    message = "That was the last step. The whole task is done.";
+  }
+  document.getElementById("done-message").textContent = message;
+
+  document.getElementById("done-progress").textContent = progressText();
+
+  const bar = document.getElementById("done-bar");
+  bar.max = state.steps.length;
+  bar.value = doneCount;
+
+  // Offer the next step, or a new task if there are no steps left.
+  if (step) {
+    document.getElementById("heading-done").textContent = "Step done";
+    document.getElementById("done-next").textContent = "Start next step: " + step.text;
+  } else {
+    document.getElementById("heading-done").textContent = "All steps done";
+    document.getElementById("done-next").textContent = "Start a new task";
+  }
+
+  showScreen("screen-done");
+  playChime();
+}
+
+document.getElementById("done-next").addEventListener("click", function () {
+  const step = nextStep();
+
+  if (step) {
+    openTimerScreen(step.id);
+  } else {
+    // Everything is done: clear the old task and go back to screen 1.
+    state.task = "";
+    state.steps = [];
+    saveState();
+    taskInput.value = "";
+    showScreen("screen-task");
+  }
+});
+
+document.getElementById("done-back").addEventListener("click", openStepsScreen);
+
+// ----- Sound -----
+// The chime is two short notes made by the browser itself (the Web
+// Audio API), so the project needs no sound files.
+let audioContext = null;   // created the first time a sound is played
+
+function playChime() {
+  try {
+    if (audioContext === null) {
+      audioContext = new AudioContext();
+    }
+    playNote(660, 0);      // first note, straight away
+    playNote(880, 0.15);   // a higher note, 0.15 seconds later
+  } catch (error) {
+    // No sound support in this browser: carry on silently.
+  }
+}
+
+// Play one soft note. frequency is the pitch in hertz; delay is how
+// many seconds from now it starts.
+function playNote(frequency, delay) {
+  const oscillator = audioContext.createOscillator();   // makes the tone
+  const volume = audioContext.createGain();             // controls loudness
+  const startTime = audioContext.currentTime + delay;
+
+  oscillator.frequency.value = frequency;
+  oscillator.connect(volume);
+  volume.connect(audioContext.destination);   // destination = the speakers
+
+  // Start quiet and fade out over 0.4 seconds, so it isn't a harsh beep.
+  volume.gain.setValueAtTime(0.15, startTime);
+  volume.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+
+  oscillator.start(startTime);
+  oscillator.stop(startTime + 0.4);
+}
 
 // ==========================================================
 // START THE APP

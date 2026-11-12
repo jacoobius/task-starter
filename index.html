@@ -60,6 +60,9 @@
         <p id="step-hint" class="hint">Keep each step small: something you could do in about 10 minutes.</p>
       </form>
 
+      <!-- e.g. "3 of 5 steps done". Hidden until there are steps. -->
+      <p id="steps-progress" class="progress-text" hidden></p>
+
       <!-- app.js builds this list from state.steps -->
       <ol id="step-list" class="step-list" aria-label="Steps"></ol>
 
@@ -93,6 +96,30 @@
       </div>
 
       <button type="button" id="timer-back" class="button button-quiet">Back to steps</button>
+    </section>
+
+    <!-- Screen 4: a step is finished. Gentle feedback, then the next step. -->
+    <section id="screen-done" class="screen" aria-labelledby="heading-done" hidden>
+
+      <!-- Check mark picture. Decorative, so hidden from screen readers. -->
+      <div id="done-check" class="done-check" aria-hidden="true">
+        <svg viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="23" />
+          <path d="M15 27l8 8 15-17" />
+        </svg>
+      </div>
+
+      <h1 id="heading-done" tabindex="-1">Step done</h1>
+      <p id="done-message"></p>
+
+      <p id="done-progress" class="progress-text"></p>
+      <!-- The bar repeats the sentence above, so screen readers skip it. -->
+      <progress id="done-bar" class="progress-bar" max="1" value="0" aria-hidden="true"></progress>
+
+      <div class="button-row">
+        <button type="button" id="done-next" class="button button-primary"></button>
+        <button type="button" id="done-back" class="button button-quiet">Back to steps</button>
+      </div>
     </section>
 
   </main>

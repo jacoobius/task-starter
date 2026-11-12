@@ -18,12 +18,22 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 3  | Screen 2: break the task into steps (add, edit, reorder, delete) | done | claude/steps |
 | 4  | Save and load the task and steps with localStorage | done | claude/storage |
 | 5  | Screen 3: large countdown timer for one step (user-chosen length, default 10 minutes) | done | claude/timer |
-| 6  | Completion: gentle feedback, progress ("3 of 5 steps done"), offer the next step | todo | |
+| 6  | Completion: gentle feedback, progress ("3 of 5 steps done"), offer the next step | done | claude/completion |
 | 7  | Settings: toggles for sound, animation, rewards, plus one switch that turns all rewards off | todo | |
 | 8  | Accessibility pass: keyboard navigation, visible focus, AA contrast, reduced motion, ARIA labels | todo | |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 6, completion (Claude): added a fourth screen, "Step done", shown
+  after "I finished this step". It has a check mark that grows into place
+  once, one of three kind sentences, a soft two-note chime, the progress
+  sentence ("3 of 5 steps done") with a bar, and one main button: "Start
+  next step: ...". When every step is done the button becomes "Start a new
+  task", which clears the old task and steps. The steps screen shows the
+  same progress sentence. The chime is made by the browser (Web Audio), so
+  there are no sound files; it also plays when the timer reaches zero.
+  There are no points, streaks or scores anywhere.
 
 - Task 5, timer (Claude): the steps screen now has one main button,
   "Start: <first step not done>", which opens screen 3. Screen 3 first asks
