@@ -9,7 +9,8 @@
 const state = {
   task: "",           // the task the user is avoiding
   steps: [],          // the steps, in order. Each is { id, text, done }
-  nextStepId: 1       // id to give the next new step, so every id is unique
+  nextStepId: 1,      // id to give the next new step, so every id is unique
+  timerMinutes: 10    // the timer length the user last chose
 };
 
 // ==========================================================
@@ -143,7 +144,29 @@ function renderSteps() {
 
     list.append(item);
   });
+
+  // The main button starts the first step that isn't done yet.
+  // It is hidden when there is no such step.
+  const startButton = document.getElementById("start-step");
+  const step = nextStep();
+  if (step) {
+    startButton.textContent = "Start: " + step.text;
+    startButton.hidden = false;
+  } else {
+    startButton.hidden = true;
+  }
 }
+
+// The first step that isn't done yet (or undefined if there is none).
+function nextStep() {
+  return state.steps.find(function (step) {
+    return !step.done;
+  });
+}
+
+document.getElementById("start-step").addEventListener("click", function () {
+  openTimerScreen(nextStep().id);
+});
 
 // Call this after any change to the steps: save, redraw the list and
 // tell screen-reader users what happened.
@@ -161,6 +184,14 @@ function buildStepRow(step, index) {
   const text = document.createElement("span");
   text.className = "step-text";
   text.textContent = step.text;
+
+  // A finished step gets a small "Done" label after its text.
+  if (step.done) {
+    const mark = document.createElement("span");
+    mark.className = "step-mark";
+    mark.textContent = "Done";
+    text.append(mark);
+  }
 
   const editButton = makeStepButton("Edit", "Edit", "edit", step);
   const upButton = makeStepButton("Up", "Move up", "up", step);
@@ -327,6 +358,167 @@ stepForm.addEventListener("submit", function (event) {
   stepInput.value = "";
   stepInput.focus();
   stepsChanged("Step added: " + text);
+});
+
+// ==========================================================
+// SCREEN 3: THE TIMER
+// The screen has two parts. Part A asks how many minutes. Part B is
+// the countdown. Only one part is visible at a time.
+// ==========================================================
+const APP_TITLE = "Task Starter";
+
+const timerSetup = document.getElementById("timer-setup");
+const timerRunning = document.getElementById("timer-running");
+const timerMinutesInput = document.getElementById("timer-minutes");
+const timerDisplay = document.getElementById("timer-display");
+const timerMessage = document.getElementById("timer-message");
+const timerPauseButton = document.getElementById("timer-pause");
+const timerMoreButton = document.getElementById("timer-more");
+
+let currentStepId = null;   // the step being worked on
+let timerEndTime = 0;       // the clock time (in ms) when the countdown hits zero
+let timerRemainingMs = 0;   // how much time is left, in milliseconds
+let timerInterval = null;   // the repeating "tick", or null when not counting
+
+// Open the timer screen for one step, showing part A.
+function openTimerScreen(stepId) {
+  stopTicking();
+  currentStepId = stepId;
+
+  document.getElementById("timer-step-name").textContent = findStep(stepId).text;
+  timerMinutesInput.value = state.timerMinutes;
+  timerSetup.hidden = false;
+  timerRunning.hidden = true;
+
+  showScreen("screen-timer");
+}
+
+// Part A: the user chose a length and pressed "Start timer".
+timerSetup.addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  const minutes = Number(timerMinutesInput.value);
+  if (!Number.isInteger(minutes) || minutes < 1 || minutes > 120) {
+    announce("Please choose a whole number of minutes between 1 and 120.");
+    timerMinutesInput.focus();
+    return;
+  }
+
+  // Remember the choice so it is the default next time.
+  state.timerMinutes = minutes;
+  saveState();
+
+  startCountdown();
+  announce("Timer started: " + minutes + " minutes.");
+});
+
+// Switch to part B and start counting down from state.timerMinutes.
+function startCountdown() {
+  timerRemainingMs = state.timerMinutes * 60 * 1000;
+
+  timerSetup.hidden = true;
+  timerRunning.hidden = false;
+  timerMessage.textContent = "";
+  timerPauseButton.hidden = false;
+  timerPauseButton.textContent = "Pause";
+  timerMoreButton.hidden = true;
+
+  startTicking();
+  timerPauseButton.focus();
+}
+
+// Start (or resume) counting down from timerRemainingMs.
+// We work out the clock time when the timer should end, then check the
+// clock four times a second. Comparing against the real clock keeps the
+// timer accurate even if the browser slows the page down in a
+// background tab.
+function startTicking() {
+  timerEndTime = Date.now() + timerRemainingMs;
+  timerInterval = setInterval(tick, 250);
+  tick();
+}
+
+function stopTicking() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+// Runs four times a second while the timer is counting.
+function tick() {
+  timerRemainingMs = Math.max(0, timerEndTime - Date.now());
+  showTime(timerRemainingMs);
+
+  if (timerRemainingMs === 0) {
+    timeIsUp();
+  }
+}
+
+// Show milliseconds as minutes:seconds, e.g. 9:05.
+// The time also goes in the browser tab title, so it stays visible
+// when the user is looking at another tab.
+function showTime(ms) {
+  const totalSeconds = Math.ceil(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  const text = minutes + ":" + String(seconds).padStart(2, "0");
+
+  timerDisplay.textContent = text;
+  document.title = text + " - " + APP_TITLE;
+}
+
+// The countdown reached zero. Nothing is forced: the user decides
+// whether the step is finished or they want more time.
+function timeIsUp() {
+  stopTicking();
+  timerMessage.textContent = "Time's up. Finished, or want a bit longer?";
+
+  // The Pause button is about to disappear. If it has keyboard focus,
+  // move focus to a button that stays.
+  if (document.activeElement === timerPauseButton) {
+    document.getElementById("timer-done").focus();
+  }
+  timerPauseButton.hidden = true;
+  timerMoreButton.hidden = false;
+  announce("Time's up.");
+}
+
+timerPauseButton.addEventListener("click", function () {
+  if (timerInterval !== null) {
+    stopTicking();
+    timerPauseButton.textContent = "Resume";
+    announce("Timer paused.");
+  } else {
+    startTicking();
+    timerPauseButton.textContent = "Pause";
+    announce("Timer resumed.");
+  }
+});
+
+// "Add more time" runs the same length again.
+timerMoreButton.addEventListener("click", function () {
+  startCountdown();
+  announce("Timer started again: " + state.timerMinutes + " minutes.");
+});
+
+// Stop the timer and put the tab title back to normal.
+function leaveTimer() {
+  stopTicking();
+  document.title = APP_TITLE;
+}
+
+// "I finished this step" works at any time, not only when time is up.
+document.getElementById("timer-done").addEventListener("click", function () {
+  findStep(currentStepId).done = true;
+  saveState();
+  leaveTimer();
+  openStepsScreen();
+});
+
+// "Back to steps" leaves the step exactly as it was. It is not marked
+// as skipped or failed.
+document.getElementById("timer-back").addEventListener("click", function () {
+  leaveTimer();
+  openStepsScreen();
 });
 
 // ==========================================================

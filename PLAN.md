@@ -17,13 +17,25 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 2  | Screen 1: type one task you're avoiding | done | claude/task-entry |
 | 3  | Screen 2: break the task into steps (add, edit, reorder, delete) | done | claude/steps |
 | 4  | Save and load the task and steps with localStorage | done | claude/storage |
-| 5  | Screen 3: large countdown timer for one step (user-chosen length, default 10 minutes) | todo | |
+| 5  | Screen 3: large countdown timer for one step (user-chosen length, default 10 minutes) | done | claude/timer |
 | 6  | Completion: gentle feedback, progress ("3 of 5 steps done"), offer the next step | todo | |
 | 7  | Settings: toggles for sound, animation, rewards, plus one switch that turns all rewards off | todo | |
 | 8  | Accessibility pass: keyboard navigation, visible focus, AA contrast, reduced motion, ARIA labels | todo | |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 5, timer (Claude): the steps screen now has one main button,
+  "Start: <first step not done>", which opens screen 3. Screen 3 first asks
+  for minutes (1 to 120, default 10, and it remembers the last choice),
+  then shows a large countdown with Pause/Resume. The timer works by
+  storing the clock time when it should end and checking the clock four
+  times a second, so it stays accurate in a background tab; the time left
+  also shows in the tab title. At zero nothing is forced: the user picks
+  "I finished this step" or "Add more time". "Back to steps" leaves the
+  step unchanged, with no skipped or failed marking. Finished steps show a
+  small "Done" label. A running timer is not saved, so reloading the page
+  stops it.
 
 - Task 4, saving (Claude): the whole state object is saved to localStorage
   as JSON under the key "task-starter" after every change (saveState), and

@@ -19,6 +19,7 @@
   --font-size-base: 1.125rem;    /* 18px: comfortable reading size */
   --font-size-small: 1rem;       /* small buttons */
   --font-size-large: 1.75rem;    /* screen headings */
+  --font-size-timer: clamp(4rem, 24vw, 9rem);   /* the countdown: as big as fits */
   --line-height: 1.5;
 
   /* Spacing and shape */
@@ -219,8 +220,58 @@ input[type="number"] {
   overflow-wrap: anywhere;
 }
 
+/* The small "Done" label beside a finished step. */
+.step-mark {
+  margin-left: var(--space-small);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
 /* ==========================================================
-   6. REDUCED MOTION
+   6. TIMER
+   ========================================================== */
+.timer-step-name {
+  margin: 0 0 var(--space-large);
+  font-size: var(--font-size-large);
+  overflow-wrap: anywhere;
+}
+
+#timer-minutes {
+  width: 8rem;
+}
+
+/* The big countdown. tabular-nums makes every digit the same width,
+   so the numbers don't wobble as they change. */
+.timer-display {
+  margin: var(--space-large) 0;
+  font-size: var(--font-size-timer);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: center;
+}
+
+.timer-message {
+  min-height: 1.5em;   /* keeps its space, so nothing jumps when text appears */
+  margin: 0;
+  text-align: center;
+}
+
+/* A group of buttons. The primary one takes a full row of its own. */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-small);
+  margin-bottom: var(--space-large);
+}
+
+.button-row .button-primary {
+  margin-top: var(--space-medium);
+}
+
+/* ==========================================================
+   7. REDUCED MOTION
    If the user's device asks for less motion, switch off
    animations and transitions everywhere.
    ========================================================== */

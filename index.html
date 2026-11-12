@@ -62,11 +62,37 @@
 
       <!-- app.js builds this list from state.steps -->
       <ol id="step-list" class="step-list" aria-label="Steps"></ol>
+
+      <!-- Hidden until there is a step to start. app.js sets its text. -->
+      <button type="button" id="start-step" class="button button-primary" hidden></button>
     </section>
 
-    <!-- Screen 3: countdown timer for one step (built in task 5) -->
+    <!-- Screen 3: countdown timer for one step -->
     <section id="screen-timer" class="screen" aria-labelledby="heading-timer" hidden>
       <h1 id="heading-timer" tabindex="-1">Just this one step</h1>
+      <p id="timer-step-name" class="timer-step-name"></p>
+
+      <!-- Part A: choose how long, then start. -->
+      <form id="timer-setup">
+        <label for="timer-minutes">How many minutes?</label>
+        <input type="number" id="timer-minutes" min="1" max="120" value="10"
+               aria-describedby="timer-hint">
+        <p id="timer-hint" class="hint">Between 1 and 120.</p>
+        <button type="submit" class="button button-primary">Start timer</button>
+      </form>
+
+      <!-- Part B: the countdown. Replaces part A once the timer starts. -->
+      <div id="timer-running" hidden>
+        <p id="timer-display" class="timer-display" role="timer" aria-label="Time left">10:00</p>
+        <p id="timer-message" class="timer-message"></p>
+        <div class="button-row">
+          <button type="button" id="timer-done" class="button button-primary">I finished this step</button>
+          <button type="button" id="timer-pause" class="button">Pause</button>
+          <button type="button" id="timer-more" class="button" hidden>Add more time</button>
+        </div>
+      </div>
+
+      <button type="button" id="timer-back" class="button button-quiet">Back to steps</button>
     </section>
 
   </main>
