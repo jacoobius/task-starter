@@ -15,7 +15,7 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 |----|------|--------|--------|
 | 1  | Page skeleton: index.html, styles.css, app.js, with all colors and fonts as CSS variables in one place | done | claude/page-skeleton |
 | 2  | Screen 1: type one task you're avoiding | done | claude/task-entry |
-| 3  | Screen 2: break the task into steps (add, edit, reorder, delete) | todo | |
+| 3  | Screen 2: break the task into steps (add, edit, reorder, delete) | done | claude/steps |
 | 4  | Save and load the task and steps with localStorage | todo | |
 | 5  | Screen 3: large countdown timer for one step (user-chosen length, default 10 minutes) | todo | |
 | 6  | Completion: gentle feedback, progress ("3 of 5 steps done"), offer the next step | todo | |
@@ -24,6 +24,15 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 3, steps screen (Claude): screen 2 now has an "Add a step" box and a
+  numbered list. Each step has Edit, Up, Down and Delete buttons. Steps
+  live in state.steps as { id, text, done }. After any change the list is
+  wiped and rebuilt by renderSteps(), which is simpler to follow than
+  updating single rows. Because rebuilding loses keyboard focus,
+  focusStepButton() puts focus back on the same button afterwards.
+  Reordering uses buttons, not drag and drop, so it works by keyboard.
+  Delete is immediate, with no "are you sure?" and no undo.
 
 - Task 2, task entry screen (Claude): screen 1 now has a labelled text box
   and one button, "Next: break it down". Submitting saves the text in a

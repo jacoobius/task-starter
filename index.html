@@ -49,6 +49,19 @@
         Task: <strong id="steps-task-name"></strong>
         <button type="button" id="change-task" class="button button-quiet">Change task</button>
       </p>
+
+      <form id="step-form">
+        <label for="step-input">Add a step</label>
+        <div class="input-row">
+          <input type="text" id="step-input" autocomplete="off" maxlength="120"
+                 aria-describedby="step-hint">
+          <button type="submit" class="button">Add step</button>
+        </div>
+        <p id="step-hint" class="hint">Keep each step small: something you could do in about 10 minutes.</p>
+      </form>
+
+      <!-- app.js builds this list from state.steps -->
+      <ol id="step-list" class="step-list" aria-label="Steps"></ol>
     </section>
 
     <!-- Screen 3: countdown timer for one step (built in task 5) -->

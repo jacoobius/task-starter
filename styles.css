@@ -17,6 +17,7 @@
   /* Fonts */
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-size-base: 1.125rem;    /* 18px: comfortable reading size */
+  --font-size-small: 1rem;       /* small buttons */
   --font-size-large: 1.75rem;    /* screen headings */
   --line-height: 1.5;
 
@@ -172,8 +173,54 @@ input[type="number"] {
   margin: 0 0 var(--space-large);
 }
 
+/* Small button: used for the row of buttons beside each step. */
+.button-small {
+  padding: 0 var(--space-small);
+  font-size: var(--font-size-small);
+}
+
 /* ==========================================================
-   5. REDUCED MOTION
+   5. STEP LIST
+   ========================================================== */
+
+/* A text box with a button beside it. */
+.input-row {
+  display: flex;
+  gap: var(--space-small);
+}
+
+.input-row input {
+  flex: 1;
+}
+
+.step-list {
+  margin: var(--space-large) 0 0;
+  padding-left: 1.5rem;
+}
+
+.step {
+  margin-bottom: var(--space-medium);
+  padding-left: var(--space-small);
+}
+
+/* One step: its text, then its buttons. Buttons wrap onto a second
+   line on narrow screens. */
+.step-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-small);
+}
+
+.step-text,
+.step-row input {
+  flex: 1 1 10rem;
+  width: auto;
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================
+   6. REDUCED MOTION
    If the user's device asks for less motion, switch off
    animations and transitions everywhere.
    ========================================================== */
