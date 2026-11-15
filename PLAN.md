@@ -36,7 +36,7 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
   (3) docs/times-up.jpg is a screenshot of the marked moment: the timer at
   zero asking "Finished, or want a bit longer?" with no failure state.
   (4) docs/unit4-draft.md is a draft of the purpose and rationale for
-  Jacob to rewrite in his own words and export to PDF.
+  Jacob to rewrite in their own words and export to PDF.
   Still open: the brief says "not a multi-screen app" and this has four
   short screens. That is a question for the instructor.
 
