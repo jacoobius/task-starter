@@ -2,6 +2,13 @@
 
 ## Goal
 A small web app that helps adults with ADHD start tasks they're avoiding.
+
+The one constraint this is designed for (Unit 4 brief): a student with
+ADHD who has trouble starting tasks sits down to begin a writing
+assignment that is due tomorrow. They open the laptop and freeze, because
+"write the essay" has no visible first move. Every design choice should
+help at that moment.
+
 This is a class prototype, so clarity and readability matter more than
 features. The student (me) must be able to understand and explain all code.
 

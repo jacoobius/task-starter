@@ -21,9 +21,24 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 6  | Completion: gentle feedback, progress ("3 of 5 steps done"), offer the next step | done | claude/completion |
 | 7  | Settings: toggles for sound, animation, rewards, plus one switch that turns all rewards off | done | claude/settings |
 | 8  | Accessibility pass: keyboard navigation, visible focus, AA contrast, reduced motion, ARIA labels | done | claude/accessibility |
+| 9  | Match the Unit 4 brief: name one specific constraint and moment, mark the "majority would choose differently" moment, draft the purpose and rationale | done | claude/unit4-brief |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 9, Unit 4 brief (Claude): the brief asks for one specific access
+  need and moment, a marked moment where a majority design would choose
+  differently, and a half-page rationale. No app behaviour changed.
+  (1) AGENTS.md now names the constraint: a student with ADHD freezing at
+  the start of a writing assignment due tomorrow. Claude picked this as a
+  suggestion; Jacob should confirm or change it.
+  (2) The hint on screen 1 gained an example, "start my essay".
+  (3) docs/times-up.jpg is a screenshot of the marked moment: the timer at
+  zero asking "Finished, or want a bit longer?" with no failure state.
+  (4) docs/unit4-draft.md is a draft of the purpose and rationale for
+  Jacob to rewrite in his own words and export to PDF.
+  Still open: the brief says "not a multi-screen app" and this has four
+  short screens. That is a question for the instructor.
 
 - Task 8, accessibility pass (Claude): checked the finished app and fixed
   what the check found.
