@@ -14,7 +14,15 @@
 
   <header class="site-header">
     <p class="app-name">Task Starter</p>
-    <button type="button" id="settings-open" class="button button-quiet">Settings</button>
+    <div class="header-buttons">
+      <!-- Opens the companion screen. The picture is drawn by pets.js. -->
+      <button type="button" id="pet-open" class="button button-quiet pet-button reward-only">
+        <canvas class="pet-canvas pet-tiny" data-pet="mine" aria-hidden="true"></canvas>
+        <span class="visually-hidden">My companion,</span>
+        <span id="pet-open-text">Level 1</span>
+      </button>
+      <button type="button" id="settings-open" class="button button-quiet">Settings</button>
+    </div>
   </header>
 
   <!--
@@ -46,6 +54,10 @@
     <!-- Screen 2: break the task into small steps -->
     <section id="screen-steps" class="screen" aria-labelledby="heading-steps" hidden>
       <h1 id="heading-steps" tabindex="-1">Break it into small steps</h1>
+
+      <!-- A short message after stopping a timer early, e.g. "You
+           focused for 4 minutes." Hidden the rest of the time. -->
+      <p id="steps-notice" class="notice" hidden></p>
 
       <p class="task-name">
         Task: <strong id="steps-task-name"></strong>
@@ -90,6 +102,8 @@
       <div id="timer-running" hidden>
         <p id="timer-display" class="timer-display" role="timer" aria-label="Time left">10:00</p>
         <p id="timer-message" class="timer-message"></p>
+        <!-- The companion keeps the user company while the timer runs. -->
+        <canvas class="pet-canvas pet-small pet-bob timer-pet reward-only" data-pet="mine" aria-hidden="true"></canvas>
         <div class="button-row">
           <button type="button" id="timer-done" class="button button-primary">I finished this step</button>
           <button type="button" id="timer-pause" class="button">Pause</button>
@@ -114,6 +128,17 @@
       <h1 id="heading-done" tabindex="-1">Step done</h1>
       <p id="done-message"></p>
 
+      <!-- What was just earned. rewards.js fills this in. -->
+      <div id="done-reward" class="reward-box reward-only">
+        <canvas class="pet-canvas pet-medium" data-pet="mine" aria-hidden="true"></canvas>
+        <div class="reward-text">
+          <p id="done-xp" class="reward-xp"></p>
+          <p id="done-level"></p>
+          <progress id="done-xp-bar" class="progress-bar" max="50" value="0" aria-hidden="true"></progress>
+          <ul id="done-news" class="reward-news"></ul>
+        </div>
+      </div>
+
       <p id="done-progress" class="progress-text"></p>
       <!-- The bar repeats the sentence above, so screen readers skip it. -->
       <progress id="done-bar" class="progress-bar" max="1" value="0" aria-hidden="true"></progress>
@@ -122,6 +147,33 @@
         <button type="button" id="done-next" class="button button-primary"></button>
         <button type="button" id="done-back" class="button button-quiet">Back to steps</button>
       </div>
+    </section>
+
+    <!-- Screen 5: the companion, its level, badges and finished tasks.
+         Opened from the button in the header. rewards.js fills it in. -->
+    <section id="screen-pet" class="screen" aria-labelledby="heading-pet" hidden>
+      <h1 id="heading-pet" tabindex="-1">Your companion</h1>
+
+      <div class="pet-stage">
+        <canvas id="pet-big" class="pet-canvas pet-large pet-bob" data-pet="mine" role="img"></canvas>
+      </div>
+
+      <p id="pet-level" class="progress-text"></p>
+      <progress id="pet-xp-bar" class="progress-bar" max="50" value="0" aria-hidden="true"></progress>
+      <p id="pet-next" class="hint"></p>
+      <p class="hint">You earn 10 XP for each step, 1 XP for each minute the timer runs, and 20 XP for finishing a whole task. XP is never taken away.</p>
+
+      <h2>What you've done</h2>
+      <ul id="pet-stats" class="plain-list"></ul>
+
+      <h2>Badges</h2>
+      <ul id="badge-list" class="badge-list"></ul>
+
+      <h2>Finished tasks</h2>
+      <p id="finished-empty" class="hint">Tasks you finish will be listed here.</p>
+      <ul id="finished-list" class="plain-list"></ul>
+
+      <button type="button" id="pet-back" class="button button-primary">Back</button>
     </section>
 
   </main>
@@ -134,6 +186,13 @@
   <dialog id="settings-dialog" aria-labelledby="settings-heading">
     <h2 id="settings-heading">Settings</h2>
 
+    <!-- rewards.js adds one choice per animal here. -->
+    <fieldset>
+      <legend>Your companion</legend>
+      <div id="pet-choices" class="pet-choices"></div>
+      <p class="hint">It starts as an egg and grows as you earn XP. You can switch at any time and keep your XP.</p>
+    </fieldset>
+
     <!-- A disabled fieldset disables every checkbox inside it. app.js
          disables this one while plain mode is on. -->
     <fieldset id="reward-settings">
@@ -145,7 +204,7 @@
         <input type="checkbox" id="setting-animation"> Show animation
       </label>
       <label class="check-label">
-        <input type="checkbox" id="setting-rewards"> Show rewards (check mark, kind message, progress bar)
+        <input type="checkbox" id="setting-rewards"> Show rewards (companion, XP, badges, check mark, kind message)
       </label>
     </fieldset>
 
@@ -160,6 +219,9 @@
     </form>
   </dialog>
 
+  <!-- The order matters: app.js uses things from the two files above it. -->
+  <script src="pets.js"></script>
+  <script src="rewards.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

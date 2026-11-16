@@ -15,10 +15,35 @@
   --color-focus: #b8500a;        /* keyboard focus ring */
   --color-backdrop: rgba(31, 41, 51, 0.6);   /* dims the page behind Settings */
 
+  /* Companion colors. pets.js reads these to paint the pixel pictures.
+     "body" is the main color, "light" the second color, "accent" the
+     small details (nose, beak, inside of the ears). */
+  --pet-outline: #1f2933;
+  --pet-white: #ffffff;
+  --pet-cat-body: #f2a65a;
+  --pet-cat-light: #fde2c0;
+  --pet-cat-accent: #f28b9b;
+  --pet-dog-body: #d9a066;
+  --pet-dog-light: #8b5a2b;
+  --pet-dog-accent: #f28b9b;
+  --pet-bunny-body: #e3ddf0;
+  --pet-bunny-light: #ffffff;
+  --pet-bunny-accent: #f28b9b;
+  --pet-fox-body: #e8743b;
+  --pet-fox-light: #fff3e0;
+  --pet-fox-accent: #f28b9b;
+  --pet-frog-body: #7cc66a;
+  --pet-frog-light: #d9f2c4;
+  --pet-frog-accent: #f28b9b;
+  --pet-duck-body: #ffd84d;
+  --pet-duck-light: #fff3b0;
+  --pet-duck-accent: #f08a24;
+
   /* Fonts */
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-size-base: 1.125rem;    /* 18px: comfortable reading size */
   --font-size-small: 1rem;       /* small buttons */
+  --font-size-medium: 1.35rem;   /* smaller headings inside a screen */
   --font-size-large: 1.75rem;    /* screen headings */
   --font-size-timer: clamp(4rem, 24vw, 9rem);   /* the countdown: as big as fits */
   --line-height: 1.5;
@@ -343,6 +368,8 @@ input[type="number"] {
 dialog {
   width: calc(100% - 2 * var(--space-medium));
   max-width: 28rem;
+  max-height: calc(100vh - 2 * var(--space-medium));
+  overflow: auto;   /* scroll inside the pop-up if it is taller than the screen */
   padding: var(--space-large);
   color: var(--color-text);
   background: var(--color-surface);
@@ -395,7 +422,187 @@ fieldset:disabled {
 }
 
 /* ==========================================================
-   9. MOTION OFF
+   9. COMPANION AND REWARDS
+   ========================================================== */
+
+/* Every companion picture is a tiny 12 x 12 pixel canvas, stretched to
+   one of the sizes below. "pixelated" keeps the squares sharp when it
+   is stretched, which gives the pixel-art look. */
+.pet-canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.pet-tiny {
+  width: 2rem;
+  height: 2rem;
+}
+
+.pet-small {
+  width: 4rem;
+  height: 4rem;
+}
+
+.pet-medium {
+  width: 6rem;
+  height: 6rem;
+}
+
+.pet-large {
+  width: 12rem;
+  height: 12rem;
+}
+
+/* A gentle hop: down for half the time, up for the other half. */
+.pet-bob {
+  animation: bob 1.2s steps(1) infinite;
+}
+
+@keyframes bob {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.25rem);
+  }
+}
+
+/* The two buttons on the right of the header. */
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-small);
+}
+
+.pet-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-small);
+}
+
+/* The companion under the countdown. */
+.timer-pet {
+  margin: var(--space-medium) auto 0;
+}
+
+/* The big companion on its own screen. */
+.pet-stage {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-medium) 0;
+}
+
+h2 {
+  margin: var(--space-large) 0 var(--space-small);
+  font-size: var(--font-size-medium);
+}
+
+/* "What you earned" on the step-done screen: picture beside text. */
+.reward-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-medium);
+  padding: var(--space-medium);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.reward-text {
+  flex: 1;
+}
+
+.reward-text p {
+  margin: 0 0 var(--space-small);
+}
+
+.reward-xp {
+  font-size: var(--font-size-medium);
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.reward-news {
+  margin: var(--space-small) 0 0;
+  padding-left: 1.25rem;
+  font-weight: 600;
+}
+
+.plain-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+/* Badges: a grid of small cards. */
+.badge-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: var(--space-small);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-small) var(--space-medium);
+  font-size: var(--font-size-small);
+  background: var(--color-surface);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius);
+}
+
+/* Not earned yet: quieter, with a dashed outline. Not an error. */
+.badge-locked {
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 2px dashed var(--color-border);
+}
+
+/* A short message box, e.g. "You focused for 4 minutes." */
+.notice {
+  margin: 0 0 var(--space-medium);
+  padding: var(--space-small) var(--space-medium);
+  background: var(--color-surface);
+  border-left: 0.25rem solid var(--color-accent);
+  border-radius: var(--radius);
+}
+
+/* Choosing a companion in Settings: three per row. */
+.pet-choices {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-small);
+}
+
+.pet-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-small);
+  margin: 0;
+  padding: var(--space-small);
+  font-weight: 400;
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+/* Outline the chosen one. :has() means "a label that contains a
+   ticked radio button". */
+.pet-choice:has(input:checked) {
+  border-color: var(--color-accent);
+}
+
+input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--color-accent);
+}
+
+/* ==========================================================
+   10. MOTION OFF
    Animations and transitions are switched off everywhere when
    (a) the user's device asks for less motion, or
    (b) the user turned animation off in Settings. app.js then adds

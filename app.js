@@ -14,8 +14,21 @@ const state = {
   settings: {
     sound: true,      // play the chime
     animation: true,  // animate the check mark
-    rewards: true,    // show the check mark, kind message and progress bar
+    rewards: true,    // show the companion, XP, badges, check mark and kind message
     plainMode: false  // true = all three above count as off
+  },
+
+  // Rewards (see rewards.js). These only ever go up.
+  pet: "cat",         // which animal the user chose (an id from pets.js)
+  xp: 0,              // total XP earned
+  badges: [],         // ids of the badges earned so far
+  finishedTasks: [],  // tasks completed. Each is { text, steps, date }
+  taskLogged: false,  // true once the current task is in finishedTasks
+  stats: {
+    stepsDone: 0,       // steps finished, ever
+    minutesFocused: 0,  // minutes the timer has run, ever
+    tasksDone: 0,       // whole tasks finished, ever
+    daysActive: []      // each day the app was used, e.g. "2026-11-16"
   }
 };
 
@@ -41,11 +54,14 @@ function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (saved) {
-      // "settings" is an object inside state, so copy its values one
-      // level down. Copying it whole would replace our defaults and
-      // lose any setting that was added after the user last saved.
+      // "settings" and "stats" are objects inside state, so copy their
+      // values one level down. Copying them whole would replace our
+      // defaults and lose anything that was added after the user last
+      // saved.
       Object.assign(state.settings, saved.settings);
       delete saved.settings;
+      Object.assign(state.stats, saved.stats);
+      delete saved.stats;
 
       Object.assign(state, saved);
     }
@@ -77,7 +93,10 @@ function announce(message) {
 // ==========================================================
 
 // The ids of the screens in index.html.
-const SCREEN_IDS = ["screen-task", "screen-steps", "screen-timer", "screen-done"];
+const SCREEN_IDS = ["screen-task", "screen-steps", "screen-timer", "screen-done", "screen-pet"];
+
+// The screen that is showing right now.
+let currentScreenId = "screen-task";
 
 // Show one screen and hide the others.
 // Example: showScreen("screen-steps")
@@ -86,6 +105,7 @@ function showScreen(screenId) {
     const screen = document.getElementById(id);
     screen.hidden = (id !== screenId);
   }
+  currentScreenId = screenId;
 
   // Move keyboard and screen-reader focus to the new screen's heading,
   // so users know the screen changed.
@@ -411,10 +431,25 @@ let timerEndTime = 0;       // the clock time (in ms) when the countdown hits ze
 let timerRemainingMs = 0;   // how much time is left, in milliseconds
 let timerInterval = null;   // the repeating "tick", or null when not counting
 
+// For XP: how long the timer has really run on this step.
+let countdownLengthMs = 0;  // the part of the current countdown not yet counted
+let focusedMs = 0;          // time counted so far on this step
+
+// Add the time that has run since the last count to focusedMs.
+// Safe to call more than once: the second call finds nothing new to add.
+function countFocusTime() {
+  focusedMs = focusedMs + (countdownLengthMs - timerRemainingMs);
+  countdownLengthMs = timerRemainingMs;
+}
+
 // Open the timer screen for one step, showing part A.
 function openTimerScreen(stepId) {
   stopTicking();
   currentStepId = stepId;
+  focusedMs = 0;
+  countdownLengthMs = 0;
+  timerRemainingMs = 0;
+  document.getElementById("steps-notice").hidden = true;
 
   document.getElementById("timer-step-name").textContent = findStep(stepId).text;
   timerMinutesInput.value = state.timerMinutes;
@@ -446,6 +481,7 @@ timerSetup.addEventListener("submit", function (event) {
 // Switch to part B and start counting down from state.timerMinutes.
 function startCountdown() {
   timerRemainingMs = state.timerMinutes * 60 * 1000;
+  countdownLengthMs = timerRemainingMs;
 
   timerSetup.hidden = true;
   timerRunning.hidden = false;
@@ -501,6 +537,7 @@ function showTime(ms) {
 // whether the step is finished or they want more time.
 function timeIsUp() {
   stopTicking();
+  countFocusTime();
   timerMessage.textContent = "Time's up. Finished, or want a bit longer?";
 
   // The Pause button is about to disappear. If it has keyboard focus,
@@ -533,30 +570,75 @@ timerMoreButton.addEventListener("click", function () {
 });
 
 // Stop the timer and put the tab title back to normal.
+// Returns how many full minutes the timer ran on this step.
 function leaveTimer() {
   stopTicking();
+  countFocusTime();
   document.title = APP_TITLE;
+
+  const minutes = Math.floor(focusedMs / 60000);   // 60000 ms = 1 minute
+  focusedMs = 0;
+  return minutes;
 }
 
 // "I finished this step" works at any time, not only when time is up.
 document.getElementById("timer-done").addEventListener("click", function () {
+  const minutes = leaveTimer();
+
   findStep(currentStepId).done = true;
-  saveState();
-  leaveTimer();
-  openDoneScreen();
+  state.stats.stepsDone = state.stats.stepsDone + 1;
+  state.stats.minutesFocused = state.stats.minutesFocused + minutes;
+
+  // XP for the step, plus XP for the minutes spent on it.
+  let xp = XP_PER_STEP + minutes * XP_PER_MINUTE;
+
+  // Was that the last step? Then the whole task is finished: add it to
+  // the finished list and give the bonus. "taskLogged" makes sure a
+  // task is only counted once, even if steps are added to it later.
+  if (!nextStep() && !state.taskLogged) {
+    state.finishedTasks.push({
+      text: state.task,
+      steps: state.steps.length,
+      date: todayText()
+    });
+    state.stats.tasksDone = state.stats.tasksDone + 1;
+    state.taskLogged = true;
+    xp = xp + XP_TASK_BONUS;
+  }
+
+  const reward = earn(xp);   // earn() also saves
+  openDoneScreen(reward);
 });
 
 // "Back to steps" leaves the step exactly as it was. It is not marked
-// as skipped or failed.
-document.getElementById("timer-back").addEventListener("click", function () {
-  leaveTimer();
+// as skipped or failed, and the minutes spent on it still count.
+document.getElementById("timer-back").addEventListener("click", stopForNow);
+
+function stopForNow() {
+  const minutes = leaveTimer();
   openStepsScreen();
-});
+
+  if (minutes > 0) {
+    state.stats.minutesFocused = state.stats.minutesFocused + minutes;
+    earn(minutes * XP_PER_MINUTE);
+
+    const word = (minutes === 1) ? "minute" : "minutes";
+    let message = "You focused for " + minutes + " " + word + ". That counts.";
+    if (isOn("rewards")) {
+      message = message + " +" + (minutes * XP_PER_MINUTE) + " XP.";
+    }
+
+    const notice = document.getElementById("steps-notice");
+    notice.textContent = message;
+    notice.hidden = false;
+    announce(message);
+  }
+}
 
 // ==========================================================
 // SCREEN 4: STEP DONE
-// Gentle feedback only: a check mark, a kind sentence, a soft sound
-// and the progress count. No points, streaks or scores.
+// Gentle feedback: a check mark, a kind sentence, a soft sound, the
+// progress count and what was earned (XP, levels, badges).
 // ==========================================================
 
 // One of these is shown each time a step is finished.
@@ -580,7 +662,11 @@ function progressText() {
   return countDone() + " of " + total + " " + word + " done";
 }
 
-function openDoneScreen() {
+// "reward" is the report from earn() in rewards.js: how much XP was
+// just earned and whether anything new happened.
+function openDoneScreen(reward) {
+  showReward(reward);
+
   const doneCount = countDone();
   const step = nextStep();   // undefined when every step is done
 
@@ -615,11 +701,24 @@ function openDoneScreen() {
 // The check mark, kind message and progress bar are "rewards". Hide
 // them when rewards are off. The heading, the progress sentence and
 // the next-step button always stay, so the screen still works.
+// The same goes for everything in index.html with the class
+// "reward-only": the companion, the XP box and the header button.
+// (XP is still counted quietly while rewards are hidden, so nothing is
+// lost if the user turns them back on.)
 function showOrHideRewards() {
   const rewardsOff = !isOn("rewards");
   document.getElementById("done-check").hidden = rewardsOff;
   document.getElementById("done-message").hidden = rewardsOff;
   document.getElementById("done-bar").hidden = rewardsOff;
+
+  document.querySelectorAll(".reward-only").forEach(function (element) {
+    element.hidden = rewardsOff;
+  });
+
+  // The companion screen is a reward too. If it is open, close it.
+  if (rewardsOff && currentScreenId === "screen-pet") {
+    showScreen(screenBeforePet);
+  }
 }
 
 document.getElementById("done-next").addEventListener("click", function () {
@@ -631,6 +730,7 @@ document.getElementById("done-next").addEventListener("click", function () {
     // Everything is done: clear the old task and go back to screen 1.
     state.task = "";
     state.steps = [];
+    state.taskLogged = false;
     saveState();
     taskInput.value = "";
     showScreen("screen-task");
@@ -716,6 +816,8 @@ function applySettings() {
   document.body.classList.toggle("no-animation", !isOn("animation"));
 
   showOrHideRewards();
+  showChosenPet();
+  refreshPets();
 }
 
 // When a checkbox is ticked or unticked: remember it, save, and apply.
@@ -739,6 +841,7 @@ document.getElementById("settings-open").addEventListener("click", function () {
 // file so everything above already exists.
 // ==========================================================
 loadState();
+buildPetPicker();
 applySettings();
 
 // If a task was saved earlier, skip screen 1 and carry on from the steps.

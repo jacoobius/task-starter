@@ -23,12 +23,32 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 8  | Accessibility pass: keyboard navigation, visible focus, AA contrast, reduced motion, ARIA labels | done | claude/accessibility |
 | 9  | Match the Unit 4 brief: name one specific constraint and moment, mark the "majority would choose differently" moment, draft the purpose and rationale | done | claude/unit4-brief |
 | 10 | Make the site ready for GitHub Pages (README, no build step) and update AGENTS.md for the new direction (XP and companions allowed) | done | claude/github-pages |
-| 11 | Pixel companions that grow from an egg, with XP, levels, badges and a companion screen | in progress (Claude) | claude/companion |
-| 12 | Links for the task beside the timer, and a focus lock that asks before leaving a running timer | todo | |
+| 11 | Pixel companions that grow from an egg, with XP, levels, badges and a companion screen | done | claude/companion |
+| 12 | Links for the task beside the timer, and a focus lock that asks before leaving a running timer | in progress (Claude) | claude/focus-lock |
 | 13 | Extras: starter step ideas for the frozen moment, and a backup file in place of accounts | todo | |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 11, companion, XP and badges (Claude): two new files.
+  pets.js holds six pixel animals (cat, dog, bunny, fox, frog, duck). Each
+  picture is a list of text rows where every character is one pixel, and
+  drawPet() paints it on a tiny canvas that CSS stretches. The animal
+  colors are CSS variables like every other color.
+  rewards.js holds the rules: 10 XP per step, 1 XP per minute the timer
+  ran, 20 XP bonus for a whole task, 50 XP per level. The companion grows
+  at 0 (egg), 50 (hatchling), 300 (youngster) and 1000 XP (grown-up), so
+  the first change is quick and the rest are slow. earn() is the only
+  place XP is added, and nothing ever removes it.
+  The second reward system is badges (nine of them) plus a list of
+  finished tasks and four running totals, all on a new companion screen
+  opened from the header. Badges count totals, never "days in a row", so
+  none can be broken.
+  The companion is picked in Settings and can be changed without losing
+  XP. It also sits under the running timer and in the "step done" box.
+  Stopping a timer early now still gives XP for the minutes spent.
+  Plain mode and the rewards switch hide all of this; XP is still counted
+  quietly so nothing is lost when they are switched back on.
 
 - Task 10, GitHub Pages and new rules (Claude): the app was already a
   static website, so nothing in the code had to change to host it. Added
