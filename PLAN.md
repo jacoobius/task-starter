@@ -24,11 +24,27 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 9  | Match the Unit 4 brief: name one specific constraint and moment, mark the "majority would choose differently" moment, draft the purpose and rationale | done | claude/unit4-brief |
 | 10 | Make the site ready for GitHub Pages (README, no build step) and update AGENTS.md for the new direction (XP and companions allowed) | done | claude/github-pages |
 | 11 | Pixel companions that grow from an egg, with XP, levels, badges and a companion screen | done | claude/companion |
-| 12 | Links for the task beside the timer, and a focus lock that asks before leaving a running timer | in progress (Claude) | claude/focus-lock |
-| 13 | Extras: starter step ideas for the frozen moment, and a backup file in place of accounts | todo | |
+| 12 | Links for the task beside the timer, and a focus lock that asks before leaving a running timer | done | claude/focus-lock |
+| 13 | Extras: starter step ideas for the frozen moment, and a backup file in place of accounts | in progress (Claude) | claude/extras |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 12, links and focus lock (Claude): Jacob asked for the app to lock
+  the browser to the assignment's tabs. A web page is not allowed to see
+  or control other tabs, so a true lock is impossible here; it would need
+  a browser extension. What was built instead:
+  (1) Links: under "Links for this task" on the steps screen the user can
+  paste the address of their assignment. The links become "Open ..."
+  buttons beside the timer and open in a new tab, so the right page is one
+  click away. cleanLink() adds a missing "https://" and rejects text that
+  is not a web address.
+  (2) Focus lock: leaving a countdown that is still going opens a pop-up
+  where the companion asks "Stop here for now?" with "Keep going" and
+  "Stop for now". Closing or reloading the tab while the timer counts
+  makes the browser show its own "Leave site?" box. Both can be switched
+  off in Settings. Leaving is always allowed, nothing is marked as failed,
+  and the minutes already spent still earn XP.
 
 - Task 11, companion, XP and badges (Claude): two new files.
   pets.js holds six pixel animals (cat, dog, bunny, fox, frog, duck). Each

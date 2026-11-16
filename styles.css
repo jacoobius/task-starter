@@ -602,7 +602,54 @@ input[type="radio"] {
 }
 
 /* ==========================================================
-   10. MOTION OFF
+   10. LINKS AND FOCUS LOCK
+   ========================================================== */
+.links-box {
+  margin-top: var(--space-large);
+}
+
+.links-box summary {
+  padding: var(--space-small) 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link-list {
+  margin: var(--space-medium) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* One saved link: its address, then a Remove button. */
+.link-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-small);
+  margin-bottom: var(--space-small);
+}
+
+.link-list span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+/* A link that looks like a button (the "Open ..." links by the timer). */
+a.button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+#timer-links .button-row {
+  margin-bottom: 0;
+}
+
+#timer-links {
+  margin-bottom: var(--space-large);
+}
+
+/* ==========================================================
+   11. MOTION OFF
    Animations and transitions are switched off everywhere when
    (a) the user's device asks for less motion, or
    (b) the user turned animation off in Settings. app.js then adds

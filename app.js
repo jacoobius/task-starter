@@ -15,8 +15,10 @@ const state = {
     sound: true,      // play the chime
     animation: true,  // animate the check mark
     rewards: true,    // show the companion, XP, badges, check mark and kind message
-    plainMode: false  // true = all three above count as off
+    plainMode: false, // true = all three above count as off
+    focusLock: true   // ask before leaving a running timer
   },
+  links: [],          // web addresses for the current task, e.g. the assignment page
 
   // Rewards (see rewards.js). These only ever go up.
   pet: "cat",         // which animal the user chose (an id from pets.js)
@@ -200,6 +202,8 @@ function renderSteps() {
   } else {
     startButton.hidden = true;
   }
+
+  renderLinks();
 }
 
 // The first step that isn't done yet (or undefined if there is none).
@@ -411,6 +415,94 @@ stepForm.addEventListener("submit", function (event) {
   stepsChanged("Step added: " + text);
 });
 
+// ----- Links for the task -----
+// The user can save the web address of their assignment. The links are
+// shown as buttons beside the timer, so the right page is one click
+// away and there is no need to go looking for it (and get distracted).
+
+const linkForm = document.getElementById("link-form");
+const linkInput = document.getElementById("link-input");
+
+// Tidy up what the user typed into a full web address.
+// Returns null if it can't be read as one.
+function cleanLink(text) {
+  let address = text.trim();
+  if (address === "") {
+    return null;
+  }
+
+  // People often leave off the "https://" at the front. Add it. This
+  // also guarantees the link can only ever be an ordinary web page.
+  if (!address.startsWith("http://") && !address.startsWith("https://")) {
+    address = "https://" + address;
+  }
+
+  // A web address has no spaces in it.
+  if (address.includes(" ")) {
+    return null;
+  }
+
+  // new URL() checks the address and throws an error if it is nonsense.
+  // We also expect a dot in the site name, as in "docs.google.com".
+  try {
+    const url = new URL(address);
+    if (!url.hostname.includes(".")) {
+      return null;
+    }
+    return url.href;
+  } catch (error) {
+    return null;
+  }
+}
+
+linkForm.addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  const link = cleanLink(linkInput.value);
+  if (link === null) {
+    announce("That doesn't look like a web address. Try pasting it again.");
+    linkInput.focus();
+    return;
+  }
+
+  state.links.push(link);
+  saveState();
+  linkInput.value = "";
+  linkInput.focus();
+  renderLinks();
+  announce("Link added.");
+});
+
+// Redraw the list of saved links on the steps screen.
+function renderLinks() {
+  const list = document.getElementById("link-list");
+  list.innerHTML = "";
+
+  state.links.forEach(function (link, index) {
+    const item = document.createElement("li");
+
+    const text = document.createElement("span");
+    text.textContent = link;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "button button-small";
+    removeButton.textContent = "Remove";
+    removeButton.setAttribute("aria-label", "Remove link: " + link);
+
+    removeButton.addEventListener("click", function () {
+      state.links.splice(index, 1);   // take this one link out of the list
+      saveState();
+      renderLinks();
+      announce("Link removed.");
+      linkInput.focus();
+    });
+
+    item.append(text, removeButton);
+    list.append(item);
+  });
+}
+
 // ==========================================================
 // SCREEN 3: THE TIMER
 // The screen has two parts. Part A asks how many minutes. Part B is
@@ -455,6 +547,21 @@ function openTimerScreen(stepId) {
   timerMinutesInput.value = state.timerMinutes;
   timerSetup.hidden = false;
   timerRunning.hidden = true;
+
+  // One "Open ..." button per saved link. Each opens in a new tab.
+  const linkButtons = document.getElementById("timer-link-buttons");
+  linkButtons.innerHTML = "";
+
+  for (const link of state.links) {
+    const anchor = document.createElement("a");
+    anchor.className = "button";
+    anchor.href = link;
+    anchor.target = "_blank";            // open in a new tab
+    anchor.rel = "noopener noreferrer";  // the new page can't reach back into this one
+    anchor.textContent = "Open " + new URL(link).hostname;   // e.g. "Open docs.google.com"
+    linkButtons.append(anchor);
+  }
+  document.getElementById("timer-links").hidden = (state.links.length === 0);
 
   showScreen("screen-timer");
 }
@@ -612,7 +719,52 @@ document.getElementById("timer-done").addEventListener("click", function () {
 
 // "Back to steps" leaves the step exactly as it was. It is not marked
 // as skipped or failed, and the minutes spent on it still count.
-document.getElementById("timer-back").addEventListener("click", stopForNow);
+//
+// FOCUS LOCK: if the countdown is still going (or paused part-way),
+// the companion first asks whether the user really wants to stop.
+// A web page is not allowed to control other tabs, so this cannot
+// block other websites. It adds one gentle "are you sure?" and no more.
+const leaveDialog = document.getElementById("leave-dialog");
+
+document.getElementById("timer-back").addEventListener("click", function () {
+  const midCountdown = !timerRunning.hidden && timerRemainingMs > 0;
+
+  if (midCountdown && state.settings.focusLock) {
+    // Minutes so far = minutes already counted + the part of this
+    // countdown that has run.
+    const ms = focusedMs + (countdownLengthMs - timerRemainingMs);
+    const minutes = Math.floor(ms / 60000);
+    const word = (minutes === 1) ? "minute" : "minutes";
+
+    let text = "That's okay. You can come back to this step any time.";
+    if (minutes > 0) {
+      text = "That's okay. You've focused for " + minutes + " " + word + ", and that counts.";
+    }
+    document.getElementById("leave-text").textContent = text;
+
+    leaveDialog.showModal();
+  } else {
+    stopForNow();
+  }
+});
+
+document.getElementById("leave-stay").addEventListener("click", function () {
+  leaveDialog.close();
+});
+
+document.getElementById("leave-go").addEventListener("click", function () {
+  leaveDialog.close();
+  stopForNow();
+});
+
+// The other half of the focus lock: if the user closes or reloads this
+// tab while the timer is counting, the browser shows its own "Leave
+// site?" box. Browsers don't let a page change the wording.
+window.addEventListener("beforeunload", function (event) {
+  if (timerInterval !== null && state.settings.focusLock) {
+    event.preventDefault();
+  }
+});
 
 function stopForNow() {
   const minutes = leaveTimer();
@@ -730,6 +882,7 @@ document.getElementById("done-next").addEventListener("click", function () {
     // Everything is done: clear the old task and go back to screen 1.
     state.task = "";
     state.steps = [];
+    state.links = [];
     state.taskLogged = false;
     saveState();
     taskInput.value = "";
@@ -798,7 +951,8 @@ const SETTING_CHECKBOXES = {
   sound: "setting-sound",
   animation: "setting-animation",
   rewards: "setting-rewards",
-  plainMode: "setting-plain"
+  plainMode: "setting-plain",
+  focusLock: "setting-focus-lock"
 };
 
 // Make the page match state.settings.

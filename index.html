@@ -82,12 +82,36 @@
 
       <!-- Hidden until there is a step to start. app.js sets its text. -->
       <button type="button" id="start-step" class="button button-primary" hidden></button>
+
+      <!-- Optional. <details> is a built-in fold-out: it stays closed
+           until the user clicks the summary line. -->
+      <details class="links-box">
+        <summary>Links for this task (optional)</summary>
+
+        <form id="link-form">
+          <label for="link-input">Paste a link to your assignment</label>
+          <div class="input-row">
+            <input type="text" id="link-input" autocomplete="off" inputmode="url"
+                   aria-describedby="link-hint">
+            <button type="submit" class="button">Add link</button>
+          </div>
+          <p id="link-hint" class="hint">Your links appear beside the timer, so the right page is one click away. This app cannot block other websites.</p>
+        </form>
+
+        <ul id="link-list" class="link-list" aria-label="Links"></ul>
+      </details>
     </section>
 
     <!-- Screen 3: countdown timer for one step -->
     <section id="screen-timer" class="screen" aria-labelledby="heading-timer" hidden>
       <h1 id="heading-timer" tabindex="-1">Just this one step</h1>
       <p id="timer-step-name" class="timer-step-name"></p>
+
+      <!-- The task's links, as buttons. Hidden when there are none. -->
+      <div id="timer-links" hidden>
+        <div id="timer-link-buttons" class="button-row"></div>
+        <p class="hint">Links open in a new tab. The timer keeps going here, and the time left shows in this tab's title.</p>
+      </div>
 
       <!-- Part A: choose how long, then start. -->
       <form id="timer-setup">
@@ -213,10 +237,25 @@
     </label>
     <p id="plain-hint" class="hint">Turns off all three above at once.</p>
 
+    <label class="check-label">
+      <input type="checkbox" id="setting-focus-lock" aria-describedby="lock-hint"> Focus lock
+    </label>
+    <p id="lock-hint" class="hint">Asks "are you sure?" before you leave a running timer or close this tab. It cannot block other websites.</p>
+
     <!-- method="dialog" makes this button close the pop-up. -->
     <form method="dialog">
       <button type="submit" class="button button-primary">Close</button>
     </form>
+  </dialog>
+
+  <!-- Focus lock pop-up: shown when the user leaves a running timer.
+       The companion asks, gently. Leaving is always allowed. -->
+  <dialog id="leave-dialog" aria-labelledby="leave-heading">
+    <canvas class="pet-canvas pet-medium pet-bob reward-only" data-pet="mine" aria-hidden="true"></canvas>
+    <h2 id="leave-heading">Stop here for now?</h2>
+    <p id="leave-text"></p>
+    <button type="button" id="leave-stay" class="button button-primary">Keep going</button>
+    <button type="button" id="leave-go" class="button button-quiet">Stop for now</button>
   </dialog>
 
   <!-- The order matters: app.js uses things from the two files above it. -->
