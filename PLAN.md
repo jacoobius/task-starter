@@ -22,9 +22,24 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 7  | Settings: toggles for sound, animation, rewards, plus one switch that turns all rewards off | done | claude/settings |
 | 8  | Accessibility pass: keyboard navigation, visible focus, AA contrast, reduced motion, ARIA labels | done | claude/accessibility |
 | 9  | Match the Unit 4 brief: name one specific constraint and moment, mark the "majority would choose differently" moment, draft the purpose and rationale | done | claude/unit4-brief |
+| 10 | Make the site ready for GitHub Pages (README, no build step) and update AGENTS.md for the new direction (XP and companions allowed) | done | claude/github-pages |
+| 11 | Pixel companions that grow from an egg, with XP, levels, badges and a companion screen | in progress (Claude) | claude/companion |
+| 12 | Links for the task beside the timer, and a focus lock that asks before leaving a running timer | todo | |
+| 13 | Extras: starter step ideas for the frozen moment, and a backup file in place of accounts | todo | |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 10, GitHub Pages and new rules (Claude): the app was already a
+  static website, so nothing in the code had to change to host it. Added
+  README.md with the publishing steps, an empty .nojekyll file (tells
+  GitHub to serve the files as they are) and a page description.
+  AGENTS.md was changed because Jacob's new requests contradicted it: XP,
+  levels, badges and a companion are now allowed, but leaderboards,
+  penalties and anything that takes progress away are still banned.
+  Accounts stay unbuilt because GitHub Pages has no server; a backup file
+  replaces them. The site is NOT published yet: pushing to GitHub makes
+  everything public, so that step is left for Jacob to approve.
 
 - Task 9, Unit 4 brief (Claude): the brief asks for one specific access
   need and moment, a marked moment where a majority design would choose

@@ -16,6 +16,7 @@ features. The student (me) must be able to understand and explain all code.
 - Plain HTML, CSS, and JavaScript. No framework, no build step, no backend.
 - Data saved in localStorage.
 - Must run by opening index.html or a simple static server.
+- Hosted as a static website on GitHub Pages (see README.md).
 
 ## Core flow (build only this)
 1. User types one task they're avoiding.
@@ -24,11 +25,22 @@ features. The student (me) must be able to understand and explain all code.
    (length is user-chosen, default 10 minutes).
 4. On completion, show light positive feedback and offer the next step.
 
+## Around the core flow (added 2026-11-16 at Jacob's request)
+- A pixel-art companion the user picks in Settings. It grows from an egg
+  to an adult as the user earns XP.
+- XP, levels and badges for finished steps, focused minutes and tasks.
+- Links for the task, shown beside the timer, and a "focus lock" that
+  asks before the user leaves a running timer.
+- A backup file (save/load) in place of accounts.
+
 ## Design rules
 - One main action per screen. Usable within 30 seconds of first opening.
-- Gentle feedback only: small completion animation, visible progress
-  ("3 of 5 steps done"). NO points, levels, leaderboards, or
-  loss/penalty mechanics.
+- Gentle feedback: small completion animation, visible progress
+  ("3 of 5 steps done"), plus XP, levels, badges and the growing
+  companion. (XP and levels were banned at first; Jacob allowed them on
+  2026-11-16.) Still NO leaderboards and NO loss/penalty mechanics: XP,
+  levels, badges and growth are never taken away, and nothing shrinks,
+  resets or breaks when the user stays away. No streaks that can break.
 - No shame states: skipped or unfinished steps are never shown as failures.
 - Sounds, animations, and rewards must all be user-toggleable, with one
   setting that turns every reward off (for A/B testing plain vs rewarding).
@@ -38,6 +50,9 @@ features. The student (me) must be able to understand and explain all code.
 
 ## Do NOT build
 Accounts, cloud sync, notifications, AI features, mobile app.
+(Accounts and cloud sync need a server, which GitHub Pages does not have.
+A real lock on other browser tabs needs a browser extension, which would
+be a separate project. A web page cannot control other tabs.)
 
 ## Working rules for ALL agents (Claude Code and Codex)
 - Read PLAN.md before starting. Pick only tasks marked "todo" and not
