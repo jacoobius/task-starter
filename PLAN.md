@@ -25,10 +25,29 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 10 | Make the site ready for GitHub Pages (README, no build step) and update AGENTS.md for the new direction (XP and companions allowed) | done | claude/github-pages |
 | 11 | Pixel companions that grow from an egg, with XP, levels, badges and a companion screen | done | claude/companion |
 | 12 | Links for the task beside the timer, and a focus lock that asks before leaving a running timer | done | claude/focus-lock |
-| 13 | Extras: starter step ideas for the frozen moment, and a backup file in place of accounts | in progress (Claude) | claude/extras |
+| 13 | Extras: starter step ideas for the frozen moment, and a backup file in place of accounts | done | claude/extras |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 13, extras (Claude): two things Claude chose to add.
+  (1) Starter step ideas: while the step list is empty, three buttons
+  offer a first step ("Open the assignment", "Read the instructions once",
+  "Write one messy sentence"). This is aimed at the exact frozen moment
+  the project is designed for: an empty list is one more thing to stall
+  on. The adding code moved into one function, addStep(), used by both
+  the form and the buttons.
+  (2) Backup file: Settings can save everything to a file and load it
+  again. This stands in for accounts, which need a server. Loading checks
+  the file, asks before replacing anything, and re-checks any links in it.
+  Also updated docs/unit4-draft.md, which still said the app had no
+  points.
+  Checked in the browser by script: XP and growth, badges, the companion
+  screen, links, the focus lock pop-up, plain mode hiding every reward,
+  backup loading, and no sideways scroll at 320px. NOT checked: saving a
+  backup file for real, the browser's own "Leave site?" box, opening
+  links in a new tab, a screen reader, and browsers other than the
+  preview one.
 
 - Task 12, links and focus lock (Claude): Jacob asked for the app to lock
   the browser to the assignment's tabs. A web page is not allowed to see

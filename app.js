@@ -66,6 +66,12 @@ function loadState() {
       delete saved.stats;
 
       Object.assign(state, saved);
+
+      // Links can also arrive from a backup file, so check each one
+      // again and drop anything that is not an ordinary web address.
+      state.links = state.links.map(cleanLink).filter(function (link) {
+        return link !== null;
+      });
     }
   } catch (error) {
     // Nothing saved yet, or the saved text is damaged: start fresh.
@@ -186,6 +192,9 @@ function renderSteps() {
 
     list.append(item);
   });
+
+  // The ready-made first steps are only offered while the list is empty.
+  document.getElementById("step-ideas").hidden = (state.steps.length > 0);
 
   // Show progress, e.g. "3 of 5 steps done", once there are steps.
   const progress = document.getElementById("steps-progress");
@@ -406,14 +415,41 @@ stepForm.addEventListener("submit", function (event) {
     return;
   }
 
+  stepInput.value = "";
+  addStep(text);
+});
+
+// Add one step to the end of the list.
+function addStep(text) {
   state.steps.push({ id: state.nextStepId, text: text, done: false });
   state.nextStepId = state.nextStepId + 1;
 
-  // Clear the box and keep the cursor in it, ready for the next step.
-  stepInput.value = "";
+  // Keep the cursor in the box, ready for the next step.
   stepInput.focus();
   stepsChanged("Step added: " + text);
-});
+}
+
+// Ready-made first steps. Starting is the hard part, and an empty list
+// can make it harder, so these give the user something to click.
+const STEP_IDEAS = [
+  "Open the assignment",
+  "Read the instructions once",
+  "Write one messy sentence"
+];
+
+// Make one button per idea. Clicking it adds that step.
+for (const idea of STEP_IDEAS) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "button button-small";
+  button.textContent = idea;
+
+  button.addEventListener("click", function () {
+    addStep(idea);
+  });
+
+  document.getElementById("step-idea-buttons").append(button);
+}
 
 // ----- Links for the task -----
 // The user can save the web address of their assignment. The links are
@@ -988,6 +1024,73 @@ for (const name in SETTING_CHECKBOXES) {
 document.getElementById("settings-open").addEventListener("click", function () {
   document.getElementById("settings-dialog").showModal();
 });
+
+// ----- Backup file -----
+// There are no accounts (those need a server). A backup file does the
+// same job by hand: save everything to a file, then load that file in
+// another browser or on another computer.
+const backupFileInput = document.getElementById("backup-file");
+const backupMessage = document.getElementById("backup-message");
+
+// Save: turn "state" into text and hand it to the browser as a download.
+document.getElementById("backup-save").addEventListener("click", function () {
+  const text = JSON.stringify(state, null, 2);   // "2" adds indents, so the file is readable
+  const file = new Blob([text], { type: "application/json" });
+
+  // The usual trick for downloading from a page: make a link to the
+  // file, click it from code, then throw the link away.
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(file);
+  link.download = "task-starter-backup.json";
+  link.click();
+  URL.revokeObjectURL(link.href);
+
+  backupMessage.textContent = "Backup saved to your downloads folder.";
+});
+
+// Load: the visible button opens the hidden file picker.
+document.getElementById("backup-load").addEventListener("click", function () {
+  backupFileInput.click();
+});
+
+// The user picked a file: read it as text.
+backupFileInput.addEventListener("change", function () {
+  const file = backupFileInput.files[0];
+  if (!file) {
+    return;
+  }
+
+  file.text().then(loadBackupText);
+  backupFileInput.value = "";   // so the same file can be picked again later
+});
+
+// Check the text of a backup file and, if it is good, use it.
+function loadBackupText(text) {
+  // Is it one of our backups? It must be JSON and have a list of steps.
+  let looksRight = false;
+  try {
+    const saved = JSON.parse(text);
+    looksRight = (saved !== null && Array.isArray(saved.steps));
+  } catch (error) {
+    looksRight = false;
+  }
+
+  if (!looksRight) {
+    backupMessage.textContent = "That file isn't a Task Starter backup. Nothing was changed.";
+    return;
+  }
+
+  // Loading replaces what is saved here, so ask first.
+  const sure = window.confirm("Replace everything saved in this browser with this backup?");
+  if (!sure) {
+    return;
+  }
+
+  // Store the backup, then reload the page so it starts up from it.
+  localStorage.setItem(STORAGE_KEY, text);
+  stopTicking();   // so the focus lock doesn't ask "Leave site?"
+  location.reload();
+}
 
 // ==========================================================
 // START THE APP

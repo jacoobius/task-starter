@@ -74,6 +74,13 @@
         <p id="step-hint" class="hint">Keep each step small: something you could do in about 10 minutes.</p>
       </form>
 
+      <!-- Ready-made first steps, for when nothing comes to mind.
+           Shown only while the list is empty. app.js adds the buttons. -->
+      <div id="step-ideas" class="step-ideas" hidden>
+        <p class="hint">Not sure where to begin? Pick a first step:</p>
+        <div id="step-idea-buttons" class="button-row"></div>
+      </div>
+
       <!-- e.g. "3 of 5 steps done". Hidden until there are steps. -->
       <p id="steps-progress" class="progress-text" hidden></p>
 
@@ -241,6 +248,18 @@
       <input type="checkbox" id="setting-focus-lock" aria-describedby="lock-hint"> Focus lock
     </label>
     <p id="lock-hint" class="hint">Asks "are you sure?" before you leave a running timer or close this tab. It cannot block other websites.</p>
+
+    <fieldset>
+      <legend>Backup</legend>
+      <p class="hint">Everything is saved in this browser only. A backup file lets you move it to another browser or computer.</p>
+      <div class="button-row">
+        <button type="button" id="backup-save" class="button">Save a backup file</button>
+        <button type="button" id="backup-load" class="button">Load a backup file</button>
+      </div>
+      <!-- The real file picker is hidden; "Load a backup file" opens it. -->
+      <input type="file" id="backup-file" accept=".json,application/json" hidden>
+      <p id="backup-message" role="status"></p>
+    </fieldset>
 
     <!-- method="dialog" makes this button close the pop-up. -->
     <form method="dialog">

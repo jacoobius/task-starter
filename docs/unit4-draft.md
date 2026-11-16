@@ -22,7 +22,9 @@ single short flow:
 4. See a gentle "step done" message and the next step.
 
 It is deliberately not a to-do app. It holds one task at a time, shows one
-main button per screen, and has no accounts, due dates, points or streaks.
+main button per screen, and has no accounts, due dates, leaderboards or
+streaks that can break. It does have a pixel companion that grows as the
+user earns XP, and XP is never taken away.
 
 ## The moment a majority design would choose differently
 
@@ -60,8 +62,10 @@ an unfinished item as a failure. The second point is the one marked above.
   to begin than an open-ended one.
 - When time runs out, the user decides what it means. The app never
   decides that they failed.
-- Feedback is gentle (a check mark, a kind sentence, "3 of 5 steps done")
-  and every part of it can be switched off.
+- Feedback is gentle (a check mark, a kind sentence, "3 of 5 steps done",
+  XP and a growing companion) and every part of it can be switched off.
+- Rewards only ever go up. Stopping a timer early still earns XP for the
+  minutes spent, and nothing shrinks or resets after time away.
 
 **Curb-cut benefit.** The same choice helps anyone who is exhausted,
 anxious or overwhelmed, not only people with ADHD: a new parent with ten
@@ -74,7 +78,10 @@ never tells you that you failed is easier for everyone to pick back up.
 - [ ] Rewrite the text above in your own words.
 - [ ] Confirm the constraint is the one you want. It was chosen by Claude
       as a suggestion.
-- [ ] The brief says "this is not a multi-screen app". This tool has four
+- [ ] The app grew on 2026-11-16 (companion, XP, badges, links, focus
+      lock, backup). The brief says "scope it small on purpose", so decide
+      what you present: the whole site, or one feature of it.
+- [ ] The brief says "this is not a multi-screen app". This tool has five
       short screens. Ask your instructor if that is acceptable, or present
       only the timer and step-done screens as the designed feature.
 - [ ] Export to one PDF and submit with the project and the AI Log.

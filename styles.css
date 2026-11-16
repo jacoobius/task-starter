@@ -648,6 +648,16 @@ a.button {
   margin-bottom: var(--space-large);
 }
 
+/* Ready-made first steps under the "Add a step" box. */
+.step-ideas {
+  margin-top: var(--space-medium);
+}
+
+.step-ideas .button-row,
+fieldset .button-row {
+  margin: var(--space-small) 0;
+}
+
 /* ==========================================================
    11. MOTION OFF
    Animations and transitions are switched off everywhere when
