@@ -26,9 +26,26 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 11 | Pixel companions that grow from an egg, with XP, levels, badges and a companion screen | done | claude/companion |
 | 12 | Links for the task beside the timer, and a focus lock that asks before leaving a running timer | done | claude/focus-lock |
 | 13 | Extras: starter step ideas for the frozen moment, and a backup file in place of accounts | done | claude/extras |
+| 14 | Color themes (some unlock with levels) and a larger-text setting | done | claude/themes |
+| 15 | Longer progression: each companion grows on its own, grown ones join a family, new eggs, more badges | in progress (Claude) | claude/progression |
+| 16 | Animations (confetti, hops, egg wobble, screen fade), naming and patting the companion | todo | |
+| 17 | Timer extras: a bar that empties, quick length buttons, and a break timer | todo | |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 14, themes and larger text (Claude): Jacob left the next features
+  open, so these are Claude's choices. Five color themes: Paper (the
+  original), Night (dark), Forest, Blossom and Sunset. A theme is only a
+  different set of values for the color variables in styles.css; app.js
+  writes the chosen name onto the <html> element as data-theme and the
+  matching block of variables takes over. Paper and Night are free from
+  the start so a dark theme is never locked; the other three unlock at
+  levels 3, 6 and 10, which gives levels something to lead to. On a first
+  visit the app starts in Night if the device is in dark mode. Each choice
+  in Settings is painted in its own colors as a preview. "Larger text"
+  works the same way with the font-size variables. Contrast was measured
+  for all five themes and every pair passes AA.
 
 - Task 13, extras (Claude): two things Claude chose to add.
   (1) Starter step ideas: while the step list is empty, three buttons
@@ -93,8 +110,9 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
   levels, badges and a companion are now allowed, but leaderboards,
   penalties and anything that takes progress away are still banned.
   Accounts stay unbuilt because GitHub Pages has no server; a backup file
-  replaces them. The site is NOT published yet: pushing to GitHub makes
-  everything public, so that step is left for Jacob to approve.
+  replaces them. Published on 2026-11-16 after Jacob approved it:
+  https://jacoobius.github.io/task-starter/ (repository
+  jacoobius/task-starter, public). Pushing main updates the live site.
 
 - Task 9, Unit 4 brief (Claude): the brief asks for one specific access
   need and moment, a marked moment where a majority design would choose

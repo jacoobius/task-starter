@@ -16,7 +16,9 @@ const state = {
     animation: true,  // animate the check mark
     rewards: true,    // show the companion, XP, badges, check mark and kind message
     plainMode: false, // true = all three above count as off
-    focusLock: true   // ask before leaving a running timer
+    focusLock: true,  // ask before leaving a running timer
+    theme: "paper",   // color theme (an id from THEMES in rewards.js)
+    largeText: false  // bigger text everywhere
   },
   links: [],          // web addresses for the current task, e.g. the assignment page
 
@@ -55,6 +57,13 @@ function saveState() {
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+    // First visit, and the device is set to dark mode? Start in the
+    // dark theme. After that, the user's own choice is what counts.
+    if (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      state.settings.theme = "night";
+    }
+
     if (saved) {
       // "settings" and "stats" are objects inside state, so copy their
       // values one level down. Copying them whole would replace our
@@ -988,7 +997,8 @@ const SETTING_CHECKBOXES = {
   animation: "setting-animation",
   rewards: "setting-rewards",
   plainMode: "setting-plain",
-  focusLock: "setting-focus-lock"
+  focusLock: "setting-focus-lock",
+  largeText: "setting-large-text"
 };
 
 // Make the page match state.settings.
@@ -1004,6 +1014,13 @@ function applySettings() {
 
   // styles.css switches off all animation while <body> has this class.
   document.body.classList.toggle("no-animation", !isOn("animation"));
+
+  // Theme and text size. styles.css has a block of colors for each
+  // data-theme value and a block of sizes for data-text="large".
+  document.documentElement.dataset.theme = state.settings.theme;
+  document.documentElement.dataset.text = state.settings.largeText ? "large" : "normal";
+  renderThemePicker();
+  redrawPetPicker();   // the outline color can differ between themes
 
   showOrHideRewards();
   showChosenPet();

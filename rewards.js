@@ -54,6 +54,61 @@ function nextStage() {
 }
 
 // ==========================================================
+// THEMES
+// Color themes for the whole app. The colors themselves are in
+// styles.css; this list only says which themes exist and at which
+// level each one unlocks. The first two are free from the start, so a
+// dark theme is always available to anyone who needs one.
+// ==========================================================
+const THEMES = [
+  { id: "paper", name: "Paper", fromLevel: 1 },
+  { id: "night", name: "Night (dark)", fromLevel: 1 },
+  { id: "forest", name: "Forest", fromLevel: 3 },
+  { id: "blossom", name: "Blossom", fromLevel: 6 },
+  { id: "sunset", name: "Sunset", fromLevel: 10 }
+];
+
+// Build the list of theme choices in Settings. It is rebuilt whenever
+// settings are applied, because a new level can unlock a theme.
+function renderThemePicker() {
+  const container = document.getElementById("theme-choices");
+  container.innerHTML = "";
+
+  for (const theme of THEMES) {
+    const unlocked = currentLevel() >= theme.fromLevel;
+
+    const label = document.createElement("label");
+    label.className = "theme-choice";
+    label.dataset.theme = theme.id;   // paints this choice in its own colors
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "theme";
+    radio.value = theme.id;
+    radio.checked = (state.settings.theme === theme.id);
+    radio.disabled = !unlocked;
+
+    const name = document.createElement("span");
+    name.textContent = theme.name;
+    if (!unlocked) {
+      name.textContent = theme.name + " (unlocks at level " + theme.fromLevel + ")";
+    }
+
+    radio.addEventListener("change", function () {
+      state.settings.theme = theme.id;
+      saveState();
+      applySettings();   // this rebuilds the list...
+
+      // ...so put keyboard focus back on the choice that was just made.
+      document.querySelector('input[name="theme"]:checked').focus();
+    });
+
+    label.append(radio, name);
+    container.append(label);
+  }
+}
+
+// ==========================================================
 // BADGES
 // A second kind of reward: small markers for things the user has done.
 // Each badge has a test, "earned", that looks at the saved numbers.
@@ -347,7 +402,7 @@ function buildPetPicker() {
     const canvas = document.createElement("canvas");
     canvas.className = "pet-canvas pet-small";
     canvas.setAttribute("aria-hidden", "true");
-    drawPet(canvas, pet.id, "adult");   // show what it will grow into
+    canvas.dataset.pet = pet.id;   // redrawPetPicker() paints it
 
     const name = document.createElement("span");
     name.textContent = pet.name;
@@ -361,6 +416,14 @@ function buildPetPicker() {
     label.append(radio, canvas, name);
     container.append(label);
   }
+}
+
+// Paint every animal in the picker, fully grown, so the user can see
+// what each one will become.
+function redrawPetPicker() {
+  document.querySelectorAll("#pet-choices canvas").forEach(function (canvas) {
+    drawPet(canvas, canvas.dataset.pet, "adult");
+  });
 }
 
 // Tick the radio button of the companion that is saved in state.

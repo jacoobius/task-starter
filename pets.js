@@ -5,7 +5,7 @@
 // Each picture is a list of text rows. Every character is one pixel:
 //   .  nothing (see-through)
 //   o  outline
-//   e  eye, nose or mouth (same dark color as the outline)
+//   e  eye, nose or mouth (always dark)
 //   w  white
 //   b  body color      (different for each animal)
 //   l  light color     (belly, ears or spots)
@@ -231,7 +231,7 @@ function cssColor(variableName) {
 function petColors(petId) {
   return {
     o: cssColor("--pet-outline"),
-    e: cssColor("--pet-outline"),
+    e: cssColor("--pet-eye"),
     w: cssColor("--pet-white"),
     b: cssColor("--pet-" + petId + "-body"),
     l: cssColor("--pet-" + petId + "-light"),

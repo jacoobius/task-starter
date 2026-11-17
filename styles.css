@@ -3,8 +3,10 @@
    Every color, font and spacing value lives here.
    To restyle the app, change these and nothing else.
    ========================================================== */
-:root {
-  /* Colors (all text/background pairs meet WCAG AA contrast) */
+:root,
+[data-theme="paper"] {
+  /* Colors of the default theme, "Paper" (all text/background pairs
+     meet WCAG AA contrast). The other themes are further down. */
   --color-background: #fbf9f4;   /* warm off-white page */
   --color-surface: #ffffff;      /* cards and inputs */
   --color-text: #1f2933;         /* main text */
@@ -14,11 +16,14 @@
   --color-border: #7b8794;       /* input and card outlines */
   --color-focus: #b8500a;        /* keyboard focus ring */
   --color-backdrop: rgba(31, 41, 51, 0.6);   /* dims the page behind Settings */
+}
 
+:root {
   /* Companion colors. pets.js reads these to paint the pixel pictures.
      "body" is the main color, "light" the second color, "accent" the
      small details (nose, beak, inside of the ears). */
   --pet-outline: #1f2933;
+  --pet-eye: #1f2933;
   --pet-white: #ffffff;
   --pet-cat-body: #f2a65a;
   --pet-cat-light: #fde2c0;
@@ -55,6 +60,69 @@
   --radius: 0.5rem;
   --control-height: 2.75rem;     /* 44px: easy to click or tap */
   --content-width: 36rem;        /* keeps lines short and readable */
+}
+
+/* ----------------------------------------------------------
+   THEMES
+   A theme is just a different set of values for the color variables
+   above. app.js puts the chosen theme's name on the <html> element,
+   e.g. <html data-theme="night">, and the matching block below takes
+   over. "Paper" is the default and needs no block.
+   Every theme was checked for WCAG AA contrast.
+   ---------------------------------------------------------- */
+[data-theme="night"] {
+  --color-background: #161b22;
+  --color-surface: #222a35;
+  --color-text: #f0f3f6;
+  --color-text-muted: #b3bdc9;
+  --color-accent: #7fd1c7;
+  --color-accent-text: #10242a;
+  --color-border: #8b98a8;
+  --color-focus: #ffb454;
+  --color-backdrop: rgba(0, 0, 0, 0.7);
+  --pet-outline: #94a3b8;   /* a light outline, so companions show up on the dark page */
+  color-scheme: dark;   /* tells the browser to draw dark scrollbars and checkboxes */
+}
+
+[data-theme="forest"] {
+  --color-background: #f1f6ee;
+  --color-surface: #ffffff;
+  --color-text: #1c2b1f;
+  --color-text-muted: #4c5f50;
+  --color-accent: #2f6b3c;
+  --color-accent-text: #ffffff;
+  --color-border: #6f8572;
+  --color-focus: #a1420b;
+}
+
+[data-theme="blossom"] {
+  --color-background: #fdf4f7;
+  --color-surface: #ffffff;
+  --color-text: #2b1f26;
+  --color-text-muted: #6a5560;
+  --color-accent: #a2336b;
+  --color-accent-text: #ffffff;
+  --color-border: #94808a;
+  --color-focus: #1d5c63;
+}
+
+[data-theme="sunset"] {
+  --color-background: #fff6ec;
+  --color-surface: #ffffff;
+  --color-text: #2d2018;
+  --color-text-muted: #6b574a;
+  --color-accent: #b0451c;
+  --color-accent-text: #ffffff;
+  --color-border: #96826f;
+  --color-focus: #1d4f91;
+}
+
+/* Larger text: app.js sets <html data-text="large">. */
+[data-text="large"] {
+  --font-size-base: 1.35rem;
+  --font-size-small: 1.2rem;
+  --font-size-medium: 1.6rem;
+  --font-size-large: 2.1rem;
 }
 
 /* ==========================================================
@@ -596,9 +664,44 @@ h2 {
 }
 
 input[type="radio"] {
+  flex: none;
   width: 1.25rem;
   height: 1.25rem;
   accent-color: var(--color-accent);
+}
+
+/* Choosing a theme in Settings. Each choice carries its own
+   data-theme, so it is painted in that theme's colors: a preview. */
+.theme-choices {
+  display: grid;
+  gap: var(--space-small);
+  margin-bottom: var(--space-small);
+}
+
+.theme-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-small);
+  min-height: var(--control-height);
+  margin: 0;
+  padding: var(--space-small) var(--space-medium);
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-background);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.theme-choice:has(input:checked) {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+/* Not unlocked yet. */
+.theme-choice:has(input:disabled) {
+  opacity: 0.6;
+  cursor: default;
 }
 
 /* ==========================================================
