@@ -27,12 +27,26 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 12 | Links for the task beside the timer, and a focus lock that asks before leaving a running timer | done | claude/focus-lock |
 | 13 | Extras: starter step ideas for the frozen moment, and a backup file in place of accounts | done | claude/extras |
 | 14 | Color themes (some unlock with levels) and a larger-text setting | done | claude/themes |
-| 15 | Longer progression: each companion grows on its own, grown ones join a family, new eggs, more badges | in progress (Claude) | claude/progression |
-| 16 | Animations (confetti, hops, egg wobble, screen fade), naming and patting the companion | todo | |
+| 15 | Longer progression: each companion grows on its own, grown ones join a family, new eggs, more badges | done | claude/progression |
+| 16 | Animations (confetti, hops, egg wobble, screen fade), naming and patting the companion | in progress (Claude) | claude/animations |
 | 17 | Timer extras: a bar that empties, quick length buttons, and a break timer | todo | |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 15, longer progression (Claude): Jacob asked for more to work
+  toward than one companion reaching 1000 XP. There are now two numbers:
+  state.xp (everything ever earned, sets the level, never resets) and
+  state.petXp (what the current companion has earned, sets its size).
+  When a companion is fully grown, a "Hatch a new egg" button appears on
+  the companion screen. The grown one is kept: it joins "Your family" on
+  that screen, and a new egg of an animal not raised yet starts growing.
+  Raising all six is the long goal (6000 XP). Nothing is lost by hatching
+  a new egg; the level and total carry on.
+  Seven longer-term badges were added (level 10 and 25, fifty steps, five
+  hours, ten tasks, family of three, full house), and reaching a level
+  that unlocks a theme is now announced on the "step done" screen.
+  Old saves have no petXp, so loadState() sets it to the total.
 
 - Task 14, themes and larger text (Claude): Jacob left the next features
   open, so these are Claude's choices. Five color themes: Paper (the

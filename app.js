@@ -24,7 +24,9 @@ const state = {
 
   // Rewards (see rewards.js). These only ever go up.
   pet: "cat",         // which animal the user chose (an id from pets.js)
-  xp: 0,              // total XP earned
+  xp: 0,              // total XP earned, ever. Sets the level
+  petXp: 0,           // XP earned by the current companion. Sets its size
+  family: [],         // fully grown companions. Each is { pet, date }
   badges: [],         // ids of the badges earned so far
   finishedTasks: [],  // tasks completed. Each is { text, steps, date }
   taskLogged: false,  // true once the current task is in finishedTasks
@@ -75,6 +77,12 @@ function loadState() {
       delete saved.stats;
 
       Object.assign(state, saved);
+
+      // Data saved before "petXp" existed has only the total. In that
+      // case the companion has earned all of it.
+      if (saved.petXp === undefined) {
+        state.petXp = state.xp;
+      }
 
       // Links can also arrive from a backup file, so check each one
       // again and drop anything that is not an ordinary web address.

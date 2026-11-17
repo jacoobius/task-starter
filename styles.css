@@ -637,6 +637,23 @@ h2 {
   border-radius: var(--radius);
 }
 
+/* The family: grown companions side by side, names underneath. */
+.family-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-medium);
+}
+
+.family-member {
+  margin: 0;
+  text-align: center;
+  font-size: var(--font-size-small);
+}
+
+.notice p {
+  margin: 0 0 var(--space-small);
+}
+
 /* Choosing a companion in Settings: three per row. */
 .pet-choices {
   display: grid;

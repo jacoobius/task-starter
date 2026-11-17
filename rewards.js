@@ -25,8 +25,13 @@ function xpToNextLevel() {
 
 // ==========================================================
 // GROWTH
-// The companion grows at these XP totals. The first change comes
-// quickly; the later ones take a lot longer.
+// Two numbers are kept:
+//   state.xp     everything the user has ever earned. Sets the level.
+//   state.petXp  what the current companion has earned. Sets its size.
+// The companion grows at the petXp totals below. The first change
+// comes quickly; the later ones take a lot longer. Once it is fully
+// grown the user can hatch a new egg (see "THE FAMILY" further down),
+// so there is always something still growing.
 // ==========================================================
 const STAGES = [
   { id: "egg", name: "Egg", fromXp: 0 },
@@ -39,7 +44,7 @@ const STAGES = [
 function currentStage() {
   let result = STAGES[0];
   for (const stage of STAGES) {
-    if (state.xp >= stage.fromXp) {
+    if (state.petXp >= stage.fromXp) {
       result = stage;
     }
   }
@@ -49,7 +54,7 @@ function currentStage() {
 // The stage it will grow into next (undefined once fully grown).
 function nextStage() {
   return STAGES.find(function (stage) {
-    return stage.fromXp > state.xp;
+    return stage.fromXp > state.petXp;
   });
 }
 
@@ -126,7 +131,7 @@ const BADGES = [
     id: "hatched",
     name: "Hatched",
     how: "Earn 50 XP so your egg hatches.",
-    earned: function () { return state.xp >= 50; }
+    earned: function () { return state.petXp >= 50 || state.family.length >= 1; }
   },
   {
     id: "whole-task",
@@ -167,8 +172,59 @@ const BADGES = [
   {
     id: "grown",
     name: "All grown up",
-    how: "Earn 1000 XP so your companion is fully grown.",
-    earned: function () { return state.xp >= 1000; }
+    how: "Raise a companion until it is fully grown.",
+    earned: function () { return state.petXp >= 1000 || state.family.length >= 1; }
+  },
+
+  // Longer-term badges, for after the first companion has grown up.
+  {
+    id: "level-10",
+    name: "Level 10",
+    how: "Reach level 10.",
+    earned: function () { return currentLevel() >= 10; }
+  },
+  {
+    id: "fifty-steps",
+    name: "Fifty steps",
+    how: "Finish fifty steps in total.",
+    earned: function () { return state.stats.stepsDone >= 50; }
+  },
+  {
+    id: "five-hours",
+    name: "Five hours of focus",
+    how: "Run the timer for 300 minutes in total.",
+    earned: function () { return state.stats.minutesFocused >= 300; }
+  },
+  {
+    id: "ten-tasks",
+    name: "Ten tasks",
+    how: "Finish ten whole tasks.",
+    earned: function () { return state.stats.tasksDone >= 10; }
+  },
+  {
+    id: "level-25",
+    name: "Level 25",
+    how: "Reach level 25.",
+    earned: function () { return currentLevel() >= 25; }
+  },
+  {
+    id: "family-of-three",
+    name: "Family of three",
+    how: "Raise three companions until they are fully grown.",
+    earned: function () { return state.family.length >= 3; }
+  },
+  {
+    id: "full-house",
+    name: "Full house",
+    how: "Raise one of every animal.",
+    earned: function () {
+      // Is every animal in pets.js somewhere in the family?
+      return PETS.every(function (pet) {
+        return state.family.some(function (member) {
+          return member.pet === pet.id;
+        });
+      });
+    }
   }
 ];
 
@@ -215,17 +271,29 @@ function earn(xpAmount) {
   const oldStage = currentStage();
 
   state.xp = state.xp + xpAmount;
+  state.petXp = state.petXp + xpAmount;
   rememberToday();
   const newBadges = collectNewBadges();
 
+  // Did this reach a level that unlocks a theme?
+  const newLevel = currentLevel();
+  const newThemes = [];
+  for (const theme of THEMES) {
+    if (theme.fromLevel > oldLevel && theme.fromLevel <= newLevel) {
+      newThemes.push(theme.name);
+    }
+  }
+
   saveState();
   refreshPets();
+  renderThemePicker();   // so a newly unlocked theme can be chosen
 
   return {
     xp: xpAmount,
-    levelUp: currentLevel() > oldLevel,
+    levelUp: newLevel > oldLevel,
     grew: currentStage() !== oldStage,
-    newBadges: newBadges
+    newBadges: newBadges,
+    newThemes: newThemes
   };
 }
 
@@ -272,6 +340,12 @@ function showReward(reward) {
     } else {
       lines.push("Your companion grew into a " + currentStage().name.toLowerCase() + "!");
     }
+  }
+  if (reward.grew && currentStage().id === "adult") {
+    lines.push("It is fully grown. You can hatch a new egg on the companion screen.");
+  }
+  for (const name of reward.newThemes) {
+    lines.push("New theme unlocked: " + name + ". Find it in Settings.");
   }
   for (const name of reward.newBadges) {
     lines.push("New badge: " + name);
@@ -328,18 +402,42 @@ function renderPetScreen() {
 
   // Level and XP.
   document.getElementById("pet-level").textContent =
-    stage.name + ". Level " + currentLevel() + ", " + state.xp + " XP.";
+    stage.name + ". Level " + currentLevel() + ", " + state.xp + " XP in total.";
   document.getElementById("pet-xp-bar").value = state.xp % XP_PER_LEVEL;
 
   const next = nextStage();
   if (next) {
     document.getElementById("pet-next").textContent =
-      xpToNextLevel() + " XP to the next level. Next growth: " +
-      next.name.toLowerCase() + " at " + next.fromXp + " XP.";
+      xpToNextLevel() + " XP to the next level. It grows into a " +
+      next.name.toLowerCase() + " in " + (next.fromXp - state.petXp) + " more XP.";
   } else {
     document.getElementById("pet-next").textContent =
       xpToNextLevel() + " XP to the next level. Your companion is fully grown.";
   }
+
+  // The "hatch a new egg" box only appears once this one is fully grown.
+  document.getElementById("new-egg-box").hidden = (stage.id !== "adult");
+
+  // The family: every companion raised so far, fully grown.
+  const familyList = document.getElementById("family-list");
+  familyList.innerHTML = "";
+
+  for (const member of state.family) {
+    const figure = document.createElement("figure");
+    figure.className = "family-member";
+
+    const canvas = document.createElement("canvas");
+    canvas.className = "pet-canvas pet-small";
+    canvas.setAttribute("aria-hidden", "true");
+    drawPet(canvas, member.pet, "adult");
+
+    const caption = document.createElement("figcaption");
+    caption.textContent = findPet(member.pet).name;
+
+    figure.append(canvas, caption);
+    familyList.append(figure);
+  }
+  document.getElementById("family-empty").hidden = (state.family.length > 0);
 
   // The numbers.
   const stats = document.getElementById("pet-stats");
@@ -380,6 +478,41 @@ function renderPetScreen() {
   }
   document.getElementById("finished-empty").hidden = (state.finishedTasks.length > 0);
 }
+
+// ==========================================================
+// THE FAMILY
+// This is the long-term goal. When a companion is fully grown, the
+// user can hatch a new egg. The grown one is not lost: it joins the
+// family and stays on the companion screen for good. Total XP and the
+// level carry on as before; only petXp starts again for the new egg.
+// ==========================================================
+document.getElementById("new-egg").addEventListener("click", function () {
+  // The grown companion joins the family.
+  state.family.push({ pet: state.pet, date: todayText() });
+
+  // Pick the new egg: the first animal that isn't in the family yet.
+  // If the user has raised them all, take the next one in the list.
+  let newPet = PETS.find(function (pet) {
+    return !state.family.some(function (member) {
+      return member.pet === pet.id;
+    });
+  });
+
+  if (!newPet) {
+    const position = PETS.indexOf(findPet(state.pet));
+    newPet = PETS[(position + 1) % PETS.length];   // % wraps back to the start
+  }
+
+  state.pet = newPet.id;
+  state.petXp = 0;
+  collectNewBadges();
+  saveState();
+
+  applySettings();   // updates the picker in Settings and redraws everything
+  renderPetScreen();
+  announce("A new egg! Your grown companion has joined the family.");
+  document.getElementById("heading-pet").focus();
+});
 
 // ==========================================================
 // CHOOSING A COMPANION (in Settings)
