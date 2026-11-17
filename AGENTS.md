@@ -39,6 +39,11 @@ features. The student (me) must be able to understand and explain all code.
 - Animations (confetti, hops, fades). All of them must stay off when the
   animation setting is off, in plain mode, or under reduced motion.
 - Timer extras: a bar that empties, quick-length buttons, a break timer.
+- Staying power (added 2026-11-17): a guilt-free "welcome back" after
+  days away, a "things you started" list, seasonal treasures found on
+  any new day (never "in a row"), varied messages, "This step feels too
+  big", a user-planned treat, a companion that "works" beside the timer,
+  and optional background sound.
 
 ## Design rules
 - One main action per screen. Usable within 30 seconds of first opening.

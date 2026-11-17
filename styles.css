@@ -44,6 +44,16 @@
   --pet-duck-light: #fff3b0;
   --pet-duck-accent: #f08a24;
 
+  /* Treasure colors. pets.js reads these to paint the treasures. */
+  --item-white: #ffffff;
+  --item-red: #e5534b;
+  --item-yellow: #ffd84d;
+  --item-green: #5fae4f;
+  --item-blue: #8ec5ff;
+  --item-brown: #8b5a2b;
+  --item-orange: #f08a24;
+  --item-pink: #f28b9b;
+
   /* Fonts */
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-size-base: 1.125rem;    /* 18px: comfortable reading size */
@@ -223,7 +233,8 @@ label {
 }
 
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+select {
   width: 100%;
   min-height: var(--control-height);
   padding: var(--space-small) var(--space-medium);
@@ -940,7 +951,62 @@ fieldset .button-row {
 }
 
 /* ==========================================================
-   11. MOTION OFF
+   11. WELCOME BACK, TREATS AND TREASURES
+   ========================================================== */
+.welcome {
+  margin-top: var(--space-medium);
+}
+
+.welcome .button-row {
+  margin-bottom: 0;
+}
+
+/* The quiet "This step feels too big" link under Start timer. */
+#timer-shrink {
+  margin-top: var(--space-small);
+}
+
+.treat-box {
+  margin-top: var(--space-medium);
+}
+
+.treat-box summary {
+  padding: var(--space-small) 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#ambient-select {
+  width: auto;
+}
+
+/* What the companion is doing during the timer, and what it says
+   after a pat. */
+.timer-buddy,
+.pet-says {
+  min-height: 1.5em;   /* keeps its space, so nothing jumps */
+  margin: var(--space-small) 0 var(--space-medium);
+  text-align: center;
+}
+
+/* Treasures: 8 x 8 pixel pictures, stretched like the companions. */
+.item-canvas {
+  display: block;
+  width: 3rem;
+  height: 3rem;
+  image-rendering: pixelated;
+}
+
+.family-member .item-canvas {
+  margin: 0 auto;
+}
+
+#done-treasure {
+  margin-top: var(--space-small);
+}
+
+/* ==========================================================
+   12. MOTION OFF
    Animations and transitions are switched off everywhere when
    (a) the user's device asks for less motion, or
    (b) the user turned animation off in Settings. app.js then adds

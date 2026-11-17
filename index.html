@@ -38,6 +38,17 @@
   -->
   <main id="main">
 
+    <!-- "Welcome back" after a few days away. It sits above whichever
+         screen opens first, and goes away on the next screen change.
+         app.js fills it in. -->
+    <div id="welcome" class="notice welcome" hidden>
+      <p id="welcome-text"></p>
+      <div class="button-row">
+        <button type="button" id="welcome-continue" class="button">Pick up where I left off</button>
+        <button type="button" id="welcome-fresh" class="button button-quiet">Start fresh</button>
+      </div>
+    </div>
+
     <!-- Screen 1: type the task you're avoiding -->
     <section id="screen-task" class="screen" aria-labelledby="heading-task">
       <h1 id="heading-task" tabindex="-1">What's one task you've been avoiding?</h1>
@@ -128,12 +139,26 @@
         <p id="timer-hint" class="hint">Between 1 and 120. Or pick one:</p>
         <!-- Quick lengths. data-minutes is read by app.js. -->
         <div class="button-row preset-row" role="group" aria-label="Quick lengths">
+          <button type="button" class="button button-small timer-preset" data-minutes="2">Just 2 min</button>
           <button type="button" class="button button-small timer-preset" data-minutes="5">5 min</button>
           <button type="button" class="button button-small timer-preset" data-minutes="10">10 min</button>
           <button type="button" class="button button-small timer-preset" data-minutes="15">15 min</button>
           <button type="button" class="button button-small timer-preset" data-minutes="25">25 min</button>
         </div>
+        <!-- e.g. "Your recent steps took about 8 minutes." -->
+        <p id="timer-usual" class="hint" hidden></p>
+
+        <!-- The user's own reward. Hidden in plain mode, like all rewards. -->
+        <details class="treat-box reward-only">
+          <summary>Plan a treat for after (optional)</summary>
+          <label for="treat-input">After this step, I'll enjoy:</label>
+          <input type="text" id="treat-input" maxlength="60" autocomplete="off"
+                 aria-describedby="treat-hint">
+          <p id="treat-hint" class="hint">For example: a snack, a song, five minutes outside. It stays until you change it.</p>
+        </details>
+
         <button type="submit" class="button button-primary">Start timer</button>
+        <button type="button" id="timer-shrink" class="button button-quiet">This step feels too big</button>
       </form>
 
       <!-- Part B: the countdown. Replaces part A once the timer starts. -->
@@ -147,11 +172,21 @@
         <p id="timer-message" class="timer-message"></p>
         <!-- The companion keeps the user company while the timer runs. -->
         <canvas class="pet-canvas pet-small pet-bob timer-pet reward-only" data-pet="mine" aria-hidden="true"></canvas>
+        <!-- What the companion is "doing" beside you, e.g. "Biscuit is
+             reading quietly." It changes every two minutes. -->
+        <p id="timer-buddy" class="hint timer-buddy reward-only"></p>
         <div class="button-row">
           <button type="button" id="timer-done" class="button button-primary">I finished this step</button>
           <button type="button" id="timer-pause" class="button">Pause</button>
           <button type="button" id="timer-more" class="button" hidden>Add more time</button>
         </div>
+
+        <label for="ambient-select">Background sound</label>
+        <select id="ambient-select">
+          <option value="off">Off</option>
+          <option value="brown">Soft noise</option>
+          <option value="rain">Rain</option>
+        </select>
       </div>
 
       <button type="button" id="timer-back" class="button button-quiet">Back to steps</button>
@@ -170,6 +205,8 @@
 
       <h1 id="heading-done" tabindex="-1">Step done</h1>
       <p id="done-message"></p>
+      <!-- "Now enjoy: a snack." Only when the user planned a treat. -->
+      <p id="done-treat" class="notice" hidden></p>
 
       <!-- What was just earned. rewards.js fills this in. -->
       <div id="done-reward" class="reward-box reward-only">
@@ -179,6 +216,8 @@
           <p id="done-level"></p>
           <progress id="done-xp-bar" class="progress-bar" max="50" value="0" aria-hidden="true"></progress>
           <ul id="done-news" class="reward-news"></ul>
+          <!-- A treasure the companion just found, if any. -->
+          <canvas id="done-treasure" class="item-canvas" aria-hidden="true" hidden></canvas>
         </div>
       </div>
 
@@ -210,6 +249,8 @@
           <span id="pet-heart" class="pet-heart" aria-hidden="true" hidden>&hearts;</span>
         </button>
       </div>
+      <!-- What the companion "says" after a pat. -->
+      <p id="pet-says" class="pet-says"></p>
 
       <p id="pet-level" class="progress-text"></p>
       <progress id="pet-xp-bar" class="progress-bar" max="50" value="0" aria-hidden="true"></progress>
@@ -221,6 +262,17 @@
         <p>Your companion is fully grown. Ready for a new egg? This one stays with you and joins your family below.</p>
         <button type="button" id="new-egg" class="button">Hatch a new egg</button>
       </div>
+
+      <!-- Proof of progress that doesn't depend on points: every task
+           the user started, finished or not. -->
+      <h2>Things you started</h2>
+      <p id="started-week" class="progress-text"></p>
+      <p id="started-empty" class="hint">Every task you start a timer for will be listed here, finished or not. Starting is the hard part.</p>
+      <ul id="started-list" class="plain-list"></ul>
+
+      <h2>Treasures</h2>
+      <p id="treasure-count" class="hint"></p>
+      <div id="treasure-list" class="family-list"></div>
 
       <h2>Your family</h2>
       <p id="family-empty" class="hint">Companions you raise until they are fully grown will live here.</p>

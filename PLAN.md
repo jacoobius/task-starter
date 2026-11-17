@@ -30,9 +30,54 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 15 | Longer progression: each companion grows on its own, grown ones join a family, new eggs, more badges | done | claude/progression |
 | 16 | Animations (confetti, hops, egg wobble, screen fade), naming and patting the companion | done | claude/animations |
 | 17 | Timer extras: a bar that empties, quick length buttons, and a break timer | done | claude/timer-extras |
+| 19 | Staying power: welcome back, things you started, treasures, more varied lines, help with too-big steps, a planned treat, a working companion, background sound | done | claude/staying-power |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 19, staying power (Claude): Jacob asked what to do about rewards
+  wearing off, then said to build whatever helps. (Task 18, the AI log,
+  is on its own branch, claude/ai-log, and is not merged.) This was done
+  as one branch instead of four, because the parts share the same code.
+  The idea: stop relying on novelty alone, plan for people drifting
+  away, and make the first move easier.
+  (1) Welcome back: after 3 or more days away, a box says "Welcome back.
+  [Name] kept your spot." with "Pick up where I left off" and "Start
+  fresh". It never mentions missed days. state.lastVisit holds the last
+  day the app was opened; daysBetween() does the date sums. clearTask()
+  is now shared by "Start fresh" and "Start a new task".
+  (2) Things you started: every task gets recorded the first time a timer
+  starts for it, finished or not, because starting is the goal. The
+  companion screen lists them with "In the last 7 days you started N
+  tasks". Each record also notes whether plain mode was on, so a backup
+  file now holds what an A/B test needs.
+  (3) Treasures: the first step finished on any day (not "in a row")
+  brings one of ten small pixel items. Five only turn up at certain
+  times of year, so there is something new across the seasons. Pictures
+  are in pets.js; rules are in rewards.js.
+  (4) Variety: 16 finish messages instead of 3, picked at random but
+  never the same twice in a row (pickLine()). Patting gives a different
+  reaction each time.
+  (5) Too-big steps: "This step feels too big" on the timer screen goes
+  back to the steps and puts the next step added in front of it.
+  Also a "Just 2 min" quick length, and after three finished steps the
+  timer says how long steps usually take (the median, so one long step
+  doesn't skew it).
+  (6) A planned treat: the user can write their own reward ("a cup of
+  tea"), shown after each step. A self-chosen reward keeps its meaning
+  longer than points.
+  (7) A working companion: during the timer a caption under the
+  companion changes every two minutes ("Pip is reading quietly beside
+  you"), a light version of body doubling.
+  (8) Background sound: Off, Soft noise or Rain, made by the browser
+  (no files). It is a focus tool, so plain mode does not turn it off.
+  Two badges added: Ten starts, Treasure hunter.
+  Plain mode hides the treat, treasures, captions and welcome mention of
+  the companion. Checked by script in the preview, including plain mode
+  and 320px width, with no console errors. NOT checked: whether the
+  background sound is pleasant (it can't be heard from here), a screen
+  reader, and whether any of this actually slows novelty wearing off.
+  That needs the one-to-two-week test.
 
 - Task 17, timer extras (Claude): three small additions around the timer.
   (1) A bar under the countdown that empties as time passes. People with

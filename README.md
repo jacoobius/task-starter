@@ -13,8 +13,8 @@ nothing to build.
 |------|---------------|
 | `index.html` | Every screen of the app |
 | `styles.css` | All styling. Colors and fonts are variables at the top |
-| `pets.js` | The pixel pictures of the companions, and the code that draws them |
-| `rewards.js` | XP, levels, badges and the companion screen |
+| `pets.js` | The pixel pictures of the companions and treasures, and the code that draws them |
+| `rewards.js` | XP, levels, badges, treasures, themes and the companion screen |
 | `app.js` | The task, steps, timer, settings and saving |
 
 ## Run it on your computer

@@ -11,6 +11,11 @@ const state = {
   steps: [],          // the steps, in order. Each is { id, text, done }
   nextStepId: 1,      // id to give the next new step, so every id is unique
   timerMinutes: 10,   // the timer length the user last chose
+  treat: "",          // the user's own treat for after a step ("" = none)
+  stepMinutes: [],    // minutes the timer ran on recently finished steps
+  lastVisit: "",      // the last day the app was opened, e.g. "2026-11-17"
+  startedTasks: [],   // every task the user started a timer for. Each is { text, date, plain }
+  taskStarted: false, // true once the current task is in startedTasks
   settings: {
     sound: true,      // play the chime
     animation: true,  // animate the check mark
@@ -18,7 +23,8 @@ const state = {
     plainMode: false, // true = all three above count as off
     focusLock: true,  // ask before leaving a running timer
     theme: "paper",   // color theme (an id from THEMES in rewards.js)
-    largeText: false  // bigger text everywhere
+    largeText: false, // bigger text everywhere
+    ambient: "off"    // background sound during the timer: "off", "brown" or "rain"
   },
   links: [],          // web addresses for the current task, e.g. the assignment page
 
@@ -29,6 +35,8 @@ const state = {
   petXp: 0,           // XP earned by the current companion. Sets its size
   family: [],         // fully grown companions. Each is { pet, date }
   badges: [],         // ids of the badges earned so far
+  treasures: [],      // ids of the treasures the companion has found
+  lastGiftDay: "",    // the last day a treasure was found
   finishedTasks: [],  // tasks completed. Each is { text, steps, date }
   taskLogged: false,  // true once the current task is in finishedTasks
   stats: {
@@ -132,6 +140,9 @@ function showScreen(screenId) {
     screen.hidden = (id !== screenId);
   }
   currentScreenId = screenId;
+
+  // The "welcome back" box only belongs to the first screen shown.
+  document.getElementById("welcome").hidden = true;
 
   // Move keyboard and screen-reader focus to the new screen's heading,
   // so users know the screen changed.
@@ -437,10 +448,28 @@ stepForm.addEventListener("submit", function (event) {
   addStep(text);
 });
 
-// Add one step to the end of the list.
+// The id of a step the user said "feels too big", or null. The next
+// step they add goes in front of it (see "This step feels too big"
+// in the timer section).
+let shrinkBeforeId = null;
+
+// Add one step: normally at the end of the list, but just before the
+// too-big step if the user is breaking one down.
 function addStep(text) {
-  state.steps.push({ id: state.nextStepId, text: text, done: false });
+  const newStep = { id: state.nextStepId, text: text, done: false };
   state.nextStepId = state.nextStepId + 1;
+
+  const position = state.steps.findIndex(function (step) {
+    return step.id === shrinkBeforeId;
+  });
+
+  if (position !== -1) {
+    state.steps.splice(position, 0, newStep);   // put it in at that position
+    document.getElementById("steps-notice").hidden = true;
+  } else {
+    state.steps.push(newStep);
+  }
+  shrinkBeforeId = null;
 
   // Keep the cursor in the box, ready for the next step.
   stepInput.focus();
@@ -576,6 +605,7 @@ let currentStepId = null;   // the step being worked on
 let timerEndTime = 0;       // the clock time (in ms) when the countdown hits zero
 let timerRemainingMs = 0;   // how much time is left, in milliseconds
 let timerInterval = null;   // the repeating "tick", or null when not counting
+let buddySlot = -1;         // which two-minute stretch the companion's caption belongs to
 
 // For XP: how long the timer has really run on this step.
 let countdownLengthMs = 0;  // the part of the current countdown not yet counted
@@ -592,6 +622,7 @@ function countFocusTime() {
 function openTimerScreen(stepId) {
   stopTicking();
   currentStepId = stepId;
+  shrinkBeforeId = null;
   focusedMs = 0;
   countdownLengthMs = 0;
   timerRemainingMs = 0;
@@ -599,6 +630,20 @@ function openTimerScreen(stepId) {
 
   document.getElementById("timer-step-name").textContent = findStep(stepId).text;
   timerMinutesInput.value = state.timerMinutes;
+  document.getElementById("treat-input").value = state.treat;
+  document.getElementById("ambient-select").value = state.settings.ambient;
+
+  // After a few finished steps, say how long they usually took. This
+  // helps the user pick a length that fits how they really work.
+  const usual = document.getElementById("timer-usual");
+  const typical = typicalStepMinutes();
+  if (typical !== null) {
+    const word = (typical === 1) ? "minute" : "minutes";
+    usual.textContent = "Your recent steps took about " + typical + " " + word + ".";
+    usual.hidden = false;
+  } else {
+    usual.hidden = true;
+  }
   timerSetup.hidden = false;
   timerRunning.hidden = true;
 
@@ -636,7 +681,62 @@ timerSetup.addEventListener("submit", function (event) {
   saveState();
 
   startCountdown();
+  recordStart();
   announce("Timer started: " + minutes + " minutes.");
+});
+
+// Add the current task to "things you started", once per task.
+// Starting is what the app is for, so a start counts whether or not
+// the task gets finished. "plain" notes whether plain mode was on,
+// so an A/B test can compare the two groups from a backup file.
+function recordStart() {
+  if (state.taskStarted) {
+    return;
+  }
+  state.startedTasks.push({
+    text: state.task,
+    date: todayText(),
+    plain: state.settings.plainMode
+  });
+  state.taskStarted = true;
+  saveState();
+}
+
+// The middle value of the minutes recorded for recent steps, or null
+// if there are fewer than three. The middle value (the median) is used
+// rather than the average, so one very long step doesn't skew it.
+function typicalStepMinutes() {
+  if (state.stepMinutes.length < 3) {
+    return null;
+  }
+  const sorted = state.stepMinutes.slice().sort(function (a, b) {
+    return a - b;
+  });
+  return sorted[Math.floor(sorted.length / 2)];
+}
+
+// The user's own treat. Typing saves it straight away.
+document.getElementById("treat-input").addEventListener("input", function (event) {
+  state.treat = event.target.value.trim();
+  saveState();
+});
+
+// "This step feels too big": go back to the steps screen and add a
+// smaller step in front of this one. The new, smaller step is then the
+// next one to start.
+document.getElementById("timer-shrink").addEventListener("click", function () {
+  const step = findStep(currentStepId);
+  openStepsScreen();
+  shrinkBeforeId = step.id;   // set after openStepsScreen, which doesn't touch it
+
+  const message = "What's a smaller first piece of \"" + step.text +
+    "\"? Add it below and it will go first. Tiny is fine: \"open the file\" counts.";
+  const notice = document.getElementById("steps-notice");
+  notice.textContent = message;
+  notice.hidden = false;
+
+  stepInput.focus();
+  announce(message);
 });
 
 // The quick-length buttons ("5 min", "10 min"...) fill in the box.
@@ -660,6 +760,7 @@ function startCountdown() {
   timerMoreButton.hidden = true;
 
   startTicking();
+  startAmbient();
   timerPauseButton.focus();
 }
 
@@ -688,6 +789,14 @@ function tick() {
   const fullMs = state.timerMinutes * 60 * 1000;
   document.getElementById("timer-bar-fill").style.width = (timerRemainingMs / fullMs * 100) + "%";
 
+  // Every two minutes the companion beside the timer does something
+  // new (see rewards.js). "slot" goes up by one every two minutes.
+  const slot = Math.floor(timerRemainingMs / 120000);   // 120000 ms = 2 minutes
+  if (slot !== buddySlot) {
+    buddySlot = slot;
+    updateBuddy();
+  }
+
   if (timerRemainingMs === 0) {
     timeIsUp();
   }
@@ -714,6 +823,7 @@ function showTime(ms) {
 // whether the step is finished or they want more time.
 function timeIsUp() {
   stopTicking();
+  stopAmbient();
   countFocusTime();
   timerMessage.textContent = "Time's up. Finished, or want a bit longer?";
 
@@ -731,10 +841,12 @@ function timeIsUp() {
 timerPauseButton.addEventListener("click", function () {
   if (timerInterval !== null) {
     stopTicking();
+    stopAmbient();
     timerPauseButton.textContent = "Resume";
     announce("Timer paused.");
   } else {
     startTicking();
+    startAmbient();
     timerPauseButton.textContent = "Pause";
     announce("Timer resumed.");
   }
@@ -750,6 +862,7 @@ timerMoreButton.addEventListener("click", function () {
 // Returns how many full minutes the timer ran on this step.
 function leaveTimer() {
   stopTicking();
+  stopAmbient();
   countFocusTime();
   document.title = APP_TITLE;
 
@@ -765,6 +878,16 @@ document.getElementById("timer-done").addEventListener("click", function () {
   findStep(currentStepId).done = true;
   state.stats.stepsDone = state.stats.stepsDone + 1;
   state.stats.minutesFocused = state.stats.minutesFocused + minutes;
+
+  // Remember how long this step took (the last 20 only), for the
+  // "your recent steps took about..." hint.
+  if (minutes >= 1) {
+    state.stepMinutes.push(minutes);
+    state.stepMinutes = state.stepMinutes.slice(-20);   // -20 = the last 20
+  }
+
+  // The first step finished on a new day may bring a treasure.
+  const treasure = findTreasure();
 
   // XP for the step, plus XP for the minutes spent on it.
   let xp = XP_PER_STEP + minutes * XP_PER_MINUTE;
@@ -784,6 +907,7 @@ document.getElementById("timer-done").addEventListener("click", function () {
   }
 
   const reward = earn(xp);   // earn() also saves
+  reward.treasure = treasure;
   openDoneScreen(reward);
 });
 
@@ -866,12 +990,36 @@ function stopForNow() {
 // progress count and what was earned (XP, levels, badges).
 // ==========================================================
 
-// One of these is shown each time a step is finished.
+// One of these is shown each time a step is finished, picked at
+// random. A long list keeps them from feeling stale.
 const DONE_MESSAGES = [
   "Nice work. That's one step out of the way.",
   "Done. Getting started is the hard part, and you did it.",
-  "That one's finished. Well done."
+  "That one's finished. Well done.",
+  "You started, and then you finished. That's the whole trick.",
+  "One less thing sitting on your mind.",
+  "Look at that. It's done.",
+  "That took real effort. Well done.",
+  "Step by step is how everything gets done.",
+  "You showed up for this one.",
+  "Finished. Take a breath.",
+  "That's progress you can see.",
+  "Small step, real progress.",
+  "Done is better than perfect, and this is done.",
+  "You did the thing.",
+  "Another one finished. Nicely done.",
+  "That step is behind you now."
 ];
+let lastDoneMessage = "";   // so the same one isn't shown twice in a row
+
+// Pick a random line from a list, but never the one shown last time.
+function pickLine(lines, previous) {
+  let line = lines[Math.floor(Math.random() * lines.length)];
+  while (line === previous && lines.length > 1) {
+    line = lines[Math.floor(Math.random() * lines.length)];
+  }
+  return line;
+}
 
 // How many steps are finished.
 function countDone() {
@@ -896,13 +1044,17 @@ function openDoneScreen(reward) {
   const doneCount = countDone();
   const step = nextStep();   // undefined when every step is done
 
-  // Take the messages in turn. "%" is the remainder after dividing, so
-  // the position goes 1, 2, 0, 1, 2, 0... and never runs off the end.
-  let message = DONE_MESSAGES[doneCount % DONE_MESSAGES.length];
+  let message = pickLine(DONE_MESSAGES, lastDoneMessage);
+  lastDoneMessage = message;
   if (!step) {
     message = "That was the last step. The whole task is done.";
   }
   document.getElementById("done-message").textContent = message;
+
+  // The user's own treat, if they planned one.
+  const treat = document.getElementById("done-treat");
+  treat.textContent = "Now enjoy: " + state.treat + ". You've earned it.";
+  treat.hidden = (state.treat === "" || !isOn("rewards"));
 
   document.getElementById("done-progress").textContent = progressText();
 
@@ -955,15 +1107,24 @@ document.getElementById("done-next").addEventListener("click", function () {
     openTimerScreen(step.id);
   } else {
     // Everything is done: clear the old task and go back to screen 1.
-    state.task = "";
-    state.steps = [];
-    state.links = [];
-    state.taskLogged = false;
-    saveState();
-    taskInput.value = "";
+    clearTask();
     showScreen("screen-task");
   }
 });
+
+// Forget the current task, its steps and its links, ready for a new
+// one. Nothing about the old task is marked as failed, and anything
+// earned from it (XP, badges, "things you started") stays.
+function clearTask() {
+  state.task = "";
+  state.steps = [];
+  state.links = [];
+  state.taskLogged = false;
+  state.taskStarted = false;
+  shrinkBeforeId = null;
+  saveState();
+  taskInput.value = "";
+}
 
 document.getElementById("done-back").addEventListener("click", function () {
   stopBreak();
@@ -1062,6 +1223,102 @@ function playNote(frequency, delay) {
   oscillator.start(startTime);
   oscillator.stop(startTime + 0.4);
 }
+
+// ----- Background sound -----
+// Optional steady noise during the timer. Many people with ADHD focus
+// better with a soft, unchanging sound in the background. Like the
+// chime, it is made by the browser, so there are no sound files.
+// It is a focus tool, not a reward, so plain mode leaves it alone.
+let ambientSource = null;   // the sound playing now, or null
+
+// Make 4 seconds of noise. It is played on a loop.
+// "brown" noise is deep and soft; "rain" starts as plain hiss and is
+// filtered later in startAmbient().
+function makeNoise(kind) {
+  const length = audioContext.sampleRate * 4;   // sampleRate = numbers per second
+  const buffer = audioContext.createBuffer(1, length, audioContext.sampleRate);
+  const samples = buffer.getChannelData(0);
+
+  let previous = 0;
+  for (let i = 0; i < length; i++) {
+    const random = Math.random() * 2 - 1;   // a random number from -1 to 1
+
+    if (kind === "brown") {
+      // Each number drifts a little from the one before. Slow drifting
+      // sounds like a low rumble instead of a hiss.
+      previous = (previous + 0.02 * random) / 1.02;
+      samples[i] = previous * 3.5;
+    } else {
+      samples[i] = random;
+    }
+  }
+  return buffer;
+}
+
+function startAmbient() {
+  stopAmbient();
+  const kind = state.settings.ambient;
+  if (kind === "off") {
+    return;
+  }
+
+  try {
+    if (audioContext === null) {
+      audioContext = new AudioContext();
+    }
+
+    const source = audioContext.createBufferSource();
+    source.buffer = makeNoise(kind);
+    source.loop = true;
+
+    const volume = audioContext.createGain();
+    let loudness = 0.3;
+
+    if (kind === "rain") {
+      // Keep only the middle of the hiss, which sounds like rain.
+      const filter = audioContext.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.value = 1200;
+      filter.Q.value = 0.5;
+      source.connect(filter);
+      filter.connect(volume);
+      loudness = 0.15;
+    } else {
+      source.connect(volume);
+    }
+    volume.connect(audioContext.destination);
+
+    // Fade in over one second, so it doesn't start with a jolt.
+    const now = audioContext.currentTime;
+    volume.gain.setValueAtTime(0.001, now);
+    volume.gain.exponentialRampToValueAtTime(loudness, now + 1);
+
+    source.start();
+    ambientSource = source;
+  } catch (error) {
+    // No sound support: carry on silently.
+  }
+}
+
+function stopAmbient() {
+  if (ambientSource !== null) {
+    ambientSource.stop();
+    ambientSource = null;
+  }
+}
+
+// Changing the choice saves it, and switches the sound now if the
+// timer is counting.
+document.getElementById("ambient-select").addEventListener("change", function (event) {
+  state.settings.ambient = event.target.value;
+  saveState();
+
+  if (timerInterval !== null) {
+    startAmbient();
+  } else {
+    stopAmbient();
+  }
+});
 
 // ==========================================================
 // SETTINGS
@@ -1196,6 +1453,70 @@ function loadBackupText(text) {
 }
 
 // ==========================================================
+// WELCOME BACK
+// People often drift away from a tool and come back weeks later.
+// When that happens the app says hello (never "you missed 12 days")
+// and offers a clean start. Nothing is lost while the user is away.
+// ==========================================================
+const WELCOME_AFTER_DAYS = 3;   // say hello after this many days away
+
+// How many days from one date to another, e.g. from "2026-11-14" to
+// "2026-11-17" is 3. "T00:00" means midnight, in local time.
+function daysBetween(fromText, toText) {
+  const from = new Date(fromText + "T00:00");
+  const to = new Date(toText + "T00:00");
+  return Math.round((to - from) / 86400000);   // 86400000 ms = 1 day
+}
+
+// Runs once when the page opens.
+function checkWelcomeBack() {
+  const today = todayText();
+  let daysAway = 0;
+  if (state.lastVisit !== "") {
+    daysAway = daysBetween(state.lastVisit, today);
+  }
+  state.lastVisit = today;
+  saveState();
+
+  if (daysAway < WELCOME_AFTER_DAYS) {
+    return;
+  }
+
+  let text = "Welcome back.";
+  if (isOn("rewards")) {
+    text = "Welcome back. " + petTitle() + " kept your spot.";
+  }
+  if (state.task !== "") {
+    text = text + " Pick up where you left off, or start fresh with a new task. Either is fine.";
+  }
+  if (isOn("rewards") && treasureAvailable()) {
+    text = text + " There's a little gift waiting after your first step today.";
+  }
+
+  document.getElementById("welcome-text").textContent = text;
+
+  // With no task in progress there is nothing to pick up or clear,
+  // so the only button is a friendly "Okay".
+  const continueButton = document.getElementById("welcome-continue");
+  continueButton.textContent = (state.task !== "") ? "Pick up where I left off" : "Okay";
+  document.getElementById("welcome-fresh").hidden = (state.task === "");
+
+  document.getElementById("welcome").hidden = false;
+  announce(text);
+}
+
+document.getElementById("welcome-continue").addEventListener("click", function () {
+  document.getElementById("welcome").hidden = true;
+  document.querySelector("#" + currentScreenId + " h1").focus();
+});
+
+document.getElementById("welcome-fresh").addEventListener("click", function () {
+  clearTask();
+  showScreen("screen-task");   // this also hides the welcome box
+  announce("Fresh start. What's one task you've been avoiding?");
+});
+
+// ==========================================================
 // START THE APP
 // This runs once, when the page opens. Keep it at the bottom of the
 // file so everything above already exists.
@@ -1208,3 +1529,5 @@ applySettings();
 if (state.task !== "") {
   openStepsScreen();
 }
+
+checkWelcomeBack();

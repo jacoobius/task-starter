@@ -225,6 +225,18 @@ const BADGES = [
         });
       });
     }
+  },
+  {
+    id: "ten-starts",
+    name: "Ten starts",
+    how: "Start ten tasks you'd been avoiding. Finishing them isn't needed.",
+    earned: function () { return state.startedTasks.length >= 10; }
+  },
+  {
+    id: "treasure-hunter",
+    name: "Treasure hunter",
+    how: "Find five treasures.",
+    earned: function () { return state.treasures.length >= 5; }
   }
 ];
 
@@ -241,6 +253,48 @@ function collectNewBadges() {
     }
   }
   return newNames;
+}
+
+// ==========================================================
+// TREASURES
+// The first step finished on any new day brings a small treasure
+// (pictures in pets.js). Days don't need to be in a row, and nothing
+// is lost on days without one. Some treasures can only be found at
+// certain times of year, so there is something new across the seasons.
+// ==========================================================
+
+// The treasures that can be found this month.
+function treasuresInSeason() {
+  const month = new Date().getMonth() + 1;   // getMonth() counts from 0
+  return TREASURES.filter(function (treasure) {
+    return !treasure.months || treasure.months.includes(month);
+  });
+}
+
+// The ones in season that haven't been found yet.
+function treasuresLeft() {
+  return treasuresInSeason().filter(function (treasure) {
+    return !state.treasures.includes(treasure.id);
+  });
+}
+
+// Is a gift waiting? Only once a day, and only if there is one left.
+function treasureAvailable() {
+  return state.lastGiftDay !== todayText() && treasuresLeft().length > 0;
+}
+
+// Called when a step is finished. Returns the treasure found, or null.
+// Like XP, treasures are still collected quietly when rewards are off.
+function findTreasure() {
+  if (!treasureAvailable()) {
+    return null;
+  }
+  const choices = treasuresLeft();
+  const treasure = choices[Math.floor(Math.random() * choices.length)];
+
+  state.treasures.push(treasure.id);
+  state.lastGiftDay = todayText();
+  return treasure;   // earn(), which runs straight after, saves it
 }
 
 // ==========================================================
@@ -346,6 +400,9 @@ function showReward(reward) {
   if (reward.grew && currentStage().id === "adult") {
     lines.push("It is fully grown. You can hatch a new egg on the companion screen.");
   }
+  if (reward.treasure) {
+    lines.push(petTitle() + " found a gift: " + reward.treasure.name + "!");
+  }
   for (const name of reward.newThemes) {
     lines.push("New theme unlocked: " + name + ". Find it in Settings.");
   }
@@ -357,6 +414,13 @@ function showReward(reward) {
     const item = document.createElement("li");
     item.textContent = line;
     news.append(item);
+  }
+
+  // Show the treasure's picture under the news, if one was found.
+  const treasureCanvas = document.getElementById("done-treasure");
+  treasureCanvas.hidden = !reward.treasure;
+  if (reward.treasure) {
+    drawTreasure(treasureCanvas, reward.treasure.id);
   }
 
   // Confetti, but only when there is news. If every step set it off,
@@ -397,6 +461,59 @@ function celebrate() {
   }, 2500);
 }
 
+// ----- What the companion says and does -----
+// Lines are picked at random so they don't go stale. "NAME" is
+// replaced with the companion's name (or "Your companion").
+
+const PAT_LINES = [
+  "NAME wiggles happily.",
+  "NAME leans into the pat.",
+  "NAME looks very pleased.",
+  "NAME is glad you're here.",
+  "NAME does a tiny happy dance.",
+  "NAME closes its eyes and smiles.",
+  "NAME would like another one, please.",
+  "NAME thinks you're doing great."
+];
+
+const EGG_PAT_LINES = [
+  "The egg wobbles a little.",
+  "Something inside the egg shuffles about.",
+  "The egg feels warm.",
+  "Was that a tiny tap from inside?"
+];
+
+// While the timer runs, the companion "works" beside you, like a
+// friend sitting at the same table. Working next to someone (often
+// called body doubling) is a common ADHD focus strategy.
+const BUDDY_LINES = [
+  "NAME is reading quietly beside you.",
+  "NAME is working on its own little project.",
+  "NAME is keeping you company.",
+  "NAME is doodling in a notebook.",
+  "NAME is sorting some pebbles.",
+  "NAME is sipping a tiny cup of tea.",
+  "NAME is humming very softly.",
+  "NAME is tidying its corner."
+];
+
+const EGG_BUDDY_LINES = [
+  "Your egg is keeping you company.",
+  "Your egg is resting beside you.",
+  "Something inside the egg is listening."
+];
+
+let lastPatLine = "";
+let lastBuddyLine = "";
+
+// Give the caption under the timer's companion a new line.
+// app.js calls this when a timer starts and every two minutes after.
+function updateBuddy() {
+  const lines = (currentStage().id === "egg") ? EGG_BUDDY_LINES : BUDDY_LINES;
+  lastBuddyLine = pickLine(lines, lastBuddyLine);
+  document.getElementById("timer-buddy").textContent = lastBuddyLine.replace("NAME", petTitle());
+}
+
 // ----- Name and pats -----
 
 // What to call the companion: its name if it has one.
@@ -422,7 +539,13 @@ document.getElementById("pet-pat").addEventListener("click", function () {
 
   patButton.classList.add("is-patted");
   heart.hidden = false;
-  announce(petTitle() + " looks happy.");
+
+  // A different reaction each time.
+  const lines = (currentStage().id === "egg") ? EGG_PAT_LINES : PAT_LINES;
+  lastPatLine = pickLine(lines, lastPatLine);
+  const text = lastPatLine.replace("NAME", petTitle());
+  document.getElementById("pet-says").textContent = text;
+  announce(text);
 
   // Put everything back after the hop, so it can be patted again.
   setTimeout(function () {
@@ -491,6 +614,53 @@ function renderPetScreen() {
 
   // The "hatch a new egg" box only appears once this one is fully grown.
   document.getElementById("new-egg-box").hidden = (stage.id !== "adult");
+
+  // Things you started, newest first, with how many in the last week.
+  const startedList = document.getElementById("started-list");
+  startedList.innerHTML = "";
+
+  const today = todayText();
+  let thisWeek = 0;
+  for (const started of state.startedTasks) {
+    if (daysBetween(started.date, today) < 7) {
+      thisWeek = thisWeek + 1;
+    }
+  }
+
+  const newestStartedFirst = state.startedTasks.slice().reverse();
+  for (const started of newestStartedFirst) {
+    addListItem(startedList, started.text + " (" + started.date + ")");
+  }
+
+  const taskWord = (thisWeek === 1) ? "task" : "tasks";
+  document.getElementById("started-week").textContent =
+    "In the last 7 days you started " + thisWeek + " " + taskWord + " you'd been avoiding.";
+  document.getElementById("started-week").hidden = (state.startedTasks.length === 0);
+  document.getElementById("started-empty").hidden = (state.startedTasks.length > 0);
+
+  // Treasures found so far.
+  const treasureList = document.getElementById("treasure-list");
+  treasureList.innerHTML = "";
+
+  for (const treasureId of state.treasures) {
+    const treasure = findTreasureById(treasureId);
+    const figure = document.createElement("figure");
+    figure.className = "family-member";
+
+    const canvas = document.createElement("canvas");
+    canvas.className = "item-canvas";
+    canvas.setAttribute("aria-hidden", "true");
+    drawTreasure(canvas, treasureId);
+
+    const caption = document.createElement("figcaption");
+    caption.textContent = treasure.name;
+
+    figure.append(canvas, caption);
+    treasureList.append(figure);
+  }
+  document.getElementById("treasure-count").textContent =
+    "Found " + state.treasures.length + " of " + TREASURES.length +
+    ". Your companion may find one after your first step on any day. Some only turn up at certain times of year.";
 
   // The family: every companion raised so far, fully grown.
   const familyList = document.getElementById("family-list");

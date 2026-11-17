@@ -256,6 +256,202 @@ function paintRows(context, rows, colors) {
   });
 }
 
+// ==========================================================
+// TREASURES
+// Small things the companion finds. Each is 8 x 8 pixels, stored the
+// same way as the animals, but with its own colors:
+//   o  outline        w  white       r  red         y  yellow
+//   g  green          u  light blue  n  brown       a  orange
+//   k  pink
+// "months" (1 = January) means it can only be found at that time of
+// year. Once found, a treasure is kept for good.
+// ==========================================================
+const TREASURES = [
+  {
+    id: "mushroom",
+    name: "a tiny mushroom",
+    rows: [
+      "..oooo..",
+      ".orrwro.",
+      "orwrrrwo",
+      "orrrrwro",
+      "oooooooo",
+      "..owwo..",
+      "..owwo..",
+      "..oooo.."
+    ]
+  },
+  {
+    id: "star",
+    name: "a fallen star",
+    rows: [
+      "...oo...",
+      "..oyyo..",
+      "ooyyyyoo",
+      "oyyyyyyo",
+      ".oyyyyo.",
+      ".oyyyyo.",
+      "oyyooyyo",
+      "ooo..ooo"
+    ]
+  },
+  {
+    id: "teacup",
+    name: "a teacup",
+    rows: [
+      "........",
+      "oooooo..",
+      "onnnnooo",
+      "owwwwo.o",
+      "ouuuuooo",
+      "owwwwo..",
+      ".oooo...",
+      "oooooo.."
+    ]
+  },
+  {
+    id: "book",
+    name: "a little book",
+    rows: [
+      "........",
+      ".oooooo.",
+      ".ouuuuwo",
+      ".ouyyuwo",
+      ".ouuuuwo",
+      ".ouuuuwo",
+      ".oooooo.",
+      "........"
+    ]
+  },
+  {
+    id: "cookie",
+    name: "a cookie",
+    rows: [
+      "..oooo..",
+      ".onnnno.",
+      "ononnono",
+      "onnnnnno",
+      "onnonnno",
+      "ononnnno",
+      ".onnnno.",
+      "..oooo.."
+    ]
+  },
+  {
+    id: "flower",
+    name: "a spring flower",
+    months: [3, 4, 5],
+    rows: [
+      "..oooo..",
+      ".okkkko.",
+      "okkyykko",
+      "okkyykko",
+      ".okkkko.",
+      "..oggo..",
+      ".ogggo..",
+      "..oggo.."
+    ]
+  },
+  {
+    id: "shell",
+    name: "a summer seashell",
+    months: [6, 7, 8],
+    rows: [
+      "...oo...",
+      "..okko..",
+      ".okwkwo.",
+      "okwkwkwo",
+      "okwkwkwo",
+      ".okkkko.",
+      "..oooo..",
+      "........"
+    ]
+  },
+  {
+    id: "leaf",
+    name: "an autumn leaf",
+    months: [9, 10, 11],
+    rows: [
+      "......oo",
+      "....ooao",
+      "..ooaaao",
+      ".oaaaaao",
+      "oaanaaao",
+      "oanaaao.",
+      "onoooo..",
+      "no......"
+    ]
+  },
+  {
+    id: "pumpkin",
+    name: "a pumpkin",
+    months: [10],
+    rows: [
+      "....g...",
+      "...og...",
+      ".oooooo.",
+      "oaaoaaao",
+      "oaaoaaao",
+      "oaaoaaao",
+      ".oaoaao.",
+      "..oooo.."
+    ]
+  },
+  {
+    id: "snowflake",
+    name: "a winter snowflake",
+    months: [12, 1, 2],
+    rows: [
+      "u..u..u.",
+      ".u.u.u..",
+      "..uuu...",
+      "uuuuuuu.",
+      "..uuu...",
+      ".u.u.u..",
+      "u..u..u.",
+      "........"
+    ]
+  }
+];
+
+// Find one treasure by its id.
+function findTreasureById(treasureId) {
+  return TREASURES.find(function (treasure) {
+    return treasure.id === treasureId;
+  });
+}
+
+// Paint a treasure on a canvas. It works like drawPet(), but treasures
+// are 8 x 8 and use their own colors.
+function drawTreasure(canvas, treasureId) {
+  const treasure = findTreasureById(treasureId);
+  const colors = {
+    o: cssColor("--pet-outline"),
+    w: cssColor("--item-white"),
+    r: cssColor("--item-red"),
+    y: cssColor("--item-yellow"),
+    g: cssColor("--item-green"),
+    u: cssColor("--item-blue"),
+    n: cssColor("--item-brown"),
+    a: cssColor("--item-orange"),
+    k: cssColor("--item-pink")
+  };
+
+  canvas.width = 8;
+  canvas.height = 8;
+  const context = canvas.getContext("2d");
+
+  treasure.rows.forEach(function (row, y) {
+    for (let x = 0; x < row.length; x++) {
+      const color = colors[row[x]];   // undefined for "." (nothing)
+      if (color) {
+        context.fillStyle = color;
+        context.fillRect(x, y, 1, 1);
+      }
+    }
+  });
+}
+
 // Draw an animal at one stage of growth on a <canvas>.
 // stageId is "egg", "hatchling", "young" or "adult".
 // The canvas is only 12 x 12 pixels; styles.css stretches it and keeps
