@@ -24,6 +24,7 @@ const state = {
 
   // Rewards (see rewards.js). These only ever go up.
   pet: "cat",         // which animal the user chose (an id from pets.js)
+  petName: "",        // the name the user gave it ("" = no name)
   xp: 0,              // total XP earned, ever. Sets the level
   petXp: 0,           // XP earned by the current companion. Sets its size
   family: [],         // fully grown companions. Each is { pet, date }
@@ -792,6 +793,9 @@ document.getElementById("timer-back").addEventListener("click", function () {
     let text = "That's okay. You can come back to this step any time.";
     if (minutes > 0) {
       text = "That's okay. You've focused for " + minutes + " " + word + ", and that counts.";
+    }
+    if (isOn("rewards")) {
+      text = text + " " + petTitle() + " will be here when you get back.";
     }
     document.getElementById("leave-text").textContent = text;
 

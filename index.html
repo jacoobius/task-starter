@@ -161,7 +161,7 @@
 
       <!-- What was just earned. rewards.js fills this in. -->
       <div id="done-reward" class="reward-box reward-only">
-        <canvas class="pet-canvas pet-medium" data-pet="mine" aria-hidden="true"></canvas>
+        <canvas class="pet-canvas pet-medium pet-hop" data-pet="mine" aria-hidden="true"></canvas>
         <div class="reward-text">
           <p id="done-xp" class="reward-xp"></p>
           <p id="done-level"></p>
@@ -185,8 +185,13 @@
     <section id="screen-pet" class="screen" aria-labelledby="heading-pet" hidden>
       <h1 id="heading-pet" tabindex="-1">Your companion</h1>
 
+      <!-- The companion is a button: clicking it (or pressing Enter on
+           it) gives it a pat. Just for fun; it changes nothing. -->
       <div class="pet-stage">
-        <canvas id="pet-big" class="pet-canvas pet-large pet-bob" data-pet="mine" role="img"></canvas>
+        <button type="button" id="pet-pat" class="pet-pat">
+          <canvas id="pet-big" class="pet-canvas pet-large pet-bob" data-pet="mine" aria-hidden="true"></canvas>
+          <span id="pet-heart" class="pet-heart" aria-hidden="true" hidden>&hearts;</span>
+        </button>
       </div>
 
       <p id="pet-level" class="progress-text"></p>
@@ -231,6 +236,8 @@
     <fieldset>
       <legend>Your companion</legend>
       <div id="pet-choices" class="pet-choices"></div>
+      <label for="pet-name">Its name (optional)</label>
+      <input type="text" id="pet-name" maxlength="20" autocomplete="off">
       <p class="hint">It starts as an egg and grows as you earn XP. You can switch at any time and keep your XP.</p>
     </fieldset>
 

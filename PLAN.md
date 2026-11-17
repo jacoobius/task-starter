@@ -28,11 +28,25 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 13 | Extras: starter step ideas for the frozen moment, and a backup file in place of accounts | done | claude/extras |
 | 14 | Color themes (some unlock with levels) and a larger-text setting | done | claude/themes |
 | 15 | Longer progression: each companion grows on its own, grown ones join a family, new eggs, more badges | done | claude/progression |
-| 16 | Animations (confetti, hops, egg wobble, screen fade), naming and patting the companion | in progress (Claude) | claude/animations |
-| 17 | Timer extras: a bar that empties, quick length buttons, and a break timer | todo | |
+| 16 | Animations (confetti, hops, egg wobble, screen fade), naming and patting the companion | done | claude/animations |
+| 17 | Timer extras: a bar that empties, quick length buttons, and a break timer | in progress (Claude) | claude/timer-extras |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 16, animations, name and pats (Claude): all the movement is CSS
+  animation in styles.css; the JavaScript only adds or removes a class.
+  New: screens fade in, buttons squeeze slightly when pressed, an egg
+  wobbles where an animal would hop, the companion hops twice on the
+  "step done" screen, and pixel confetti falls when there is news (a new
+  level, growth, a badge or a theme) but not on every step, so it stays
+  special. celebrate() in rewards.js makes 30 small squares and removes
+  them after 2.5 seconds.
+  The companion can be given a name in Settings; it is used on its screen
+  and in the focus-lock pop-up. On its screen the companion is a button:
+  patting it gives a hop and a heart and changes nothing else.
+  Every animation is off when the animation switch is off, in plain mode,
+  or when the device asks for reduced motion.
 
 - Task 15, longer progression (Claude): Jacob asked for more to work
   toward than one companion reaching 1000 XP. There are now two numbers:

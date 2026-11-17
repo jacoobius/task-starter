@@ -308,6 +308,8 @@ function refreshPets() {
 
   document.querySelectorAll('canvas[data-pet="mine"]').forEach(function (canvas) {
     drawPet(canvas, state.pet, stage.id);
+    // styles.css makes an egg wobble where an animal would hop.
+    canvas.classList.toggle("is-egg", stage.id === "egg");
   });
 
   // The button in the header.
@@ -356,7 +358,78 @@ function showReward(reward) {
     item.textContent = line;
     news.append(item);
   }
+
+  // Confetti, but only when there is news. If every step set it off,
+  // it would stop feeling special.
+  if (lines.length > 0) {
+    celebrate();
+  }
 }
+
+// Drop a burst of pixel confetti down the screen, once.
+function celebrate() {
+  // Not if rewards or animation are off, and not if the device asks
+  // for less motion.
+  if (!isOn("rewards") || !isOn("animation")) {
+    return;
+  }
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  const box = document.createElement("div");
+  box.className = "confetti";
+  box.setAttribute("aria-hidden", "true");   // decoration only
+
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement("span");
+    piece.className = "confetti-piece confetti-color-" + (i % 5);   // five colors in turn
+    piece.style.left = (Math.random() * 100) + "%";                 // anywhere across the screen
+    piece.style.animationDelay = (Math.random() * 0.5) + "s";       // not all at the same moment
+    box.append(piece);
+  }
+
+  document.body.append(box);
+
+  // Clear the pieces away once they have fallen.
+  setTimeout(function () {
+    box.remove();
+  }, 2500);
+}
+
+// ----- Name and pats -----
+
+// What to call the companion: its name if it has one.
+function petTitle() {
+  if (state.petName !== "") {
+    return state.petName;
+  }
+  return "Your companion";
+}
+
+// Typing in the name box in Settings saves the name straight away.
+document.getElementById("pet-name").addEventListener("input", function (event) {
+  state.petName = event.target.value.trim();
+  saveState();
+  refreshPets();
+});
+
+// Patting the companion: a hop and a heart. It earns nothing and
+// changes nothing. It is only there to be nice.
+document.getElementById("pet-pat").addEventListener("click", function () {
+  const patButton = document.getElementById("pet-pat");
+  const heart = document.getElementById("pet-heart");
+
+  patButton.classList.add("is-patted");
+  heart.hidden = false;
+  announce(petTitle() + " looks happy.");
+
+  // Put everything back after the hop, so it can be patted again.
+  setTimeout(function () {
+    patButton.classList.remove("is-patted");
+    heart.hidden = true;
+  }, 800);
+});
 
 // ==========================================================
 // THE COMPANION SCREEN
@@ -396,9 +469,10 @@ function renderPetScreen() {
   // A description of the picture, for screen readers.
   let description = pet.name + ", " + stage.name.toLowerCase();
   if (stage.id === "egg") {
-    description = "An egg";
+    description = "an egg";
   }
-  document.getElementById("pet-big").setAttribute("aria-label", description);
+  document.getElementById("pet-pat").setAttribute("aria-label", "Pat " + petTitle() + ": " + description);
+  document.getElementById("heading-pet").textContent = petTitle();
 
   // Level and XP.
   document.getElementById("pet-level").textContent =
@@ -432,7 +506,7 @@ function renderPetScreen() {
     drawPet(canvas, member.pet, "adult");
 
     const caption = document.createElement("figcaption");
-    caption.textContent = findPet(member.pet).name;
+    caption.textContent = member.name || findPet(member.pet).name;   // its name, or just "Cat"
 
     figure.append(canvas, caption);
     familyList.append(figure);
@@ -488,7 +562,8 @@ function renderPetScreen() {
 // ==========================================================
 document.getElementById("new-egg").addEventListener("click", function () {
   // The grown companion joins the family.
-  state.family.push({ pet: state.pet, date: todayText() });
+  state.family.push({ pet: state.pet, name: state.petName, date: todayText() });
+  state.petName = "";   // the new egg has no name yet
 
   // Pick the new egg: the first animal that isn't in the family yet.
   // If the user has raised them all, take the next one in the list.
@@ -563,4 +638,10 @@ function redrawPetPicker() {
 function showChosenPet() {
   const radio = document.querySelector('input[name="pet"][value="' + findPet(state.pet).id + '"]');
   radio.checked = true;
+
+  // Show the saved name too, unless the user is typing in the box now.
+  const nameInput = document.getElementById("pet-name");
+  if (document.activeElement !== nameInput) {
+    nameInput.value = state.petName;
+  }
 }
