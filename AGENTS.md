@@ -17,6 +17,8 @@ features. The student (me) must be able to understand and explain all code.
 - Data saved in localStorage.
 - Must run by opening index.html or a simple static server.
 - Hosted as a static website on GitHub Pages (see README.md).
+- When styles.css or any .js file changes, raise the "?v=" number on all
+  four file links in index.html, so browsers don't mix old and new files.
 
 ## Core flow (build only this)
 1. User types one task they're avoiding.

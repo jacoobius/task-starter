@@ -32,9 +32,19 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 17 | Timer extras: a bar that empties, quick length buttons, and a break timer | done | claude/timer-extras |
 | 19 | Staying power: welcome back, things you started, treasures, more varied lines, help with too-big steps, a planned treat, a working companion, background sound | done | claude/staying-power |
 | 20 | Focus Lock browser extension that pauses other sites during the timer | done | claude/extension |
+| 21 | Stop browsers mixing old and new files after an update | done | claude/cache-fix |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 21, cache fix (Claude): after publishing task 20, the live site
+  loaded the new index.html with an old, saved copy of app.js. Browsers
+  keep copies of files for up to 10 minutes on GitHub Pages, and new
+  HTML with old JavaScript (or the other way round) can break the page.
+  index.html now asks for "styles.css?v=20", "app.js?v=20" and so on.
+  The number means nothing to the server, but a new number makes the
+  browser fetch a fresh copy. Raise it whenever a .css or .js file
+  changes (now a rule in AGENTS.md).
 
 - Task 20, Focus Lock extension (Claude): Jacob asked again for the tab
   lock. A website can't do it, so this is a Chrome/Edge extension in the
