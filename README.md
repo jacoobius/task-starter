@@ -48,9 +48,47 @@ browser, using localStorage. Nothing is sent anywhere, and there are no
 accounts. To move your progress to another browser or computer, use
 "Save a backup file" and "Load a backup file" in Settings.
 
-## What it cannot do
+## The Focus Lock extension (optional)
 
-A web page is not allowed to control other browser tabs, so the app
-cannot block other websites. The "focus lock" asks before you leave a
-running timer, and that is as far as a website can go. A real tab lock
-would need a browser extension.
+A web page is not allowed to control other browser tabs, so blocking
+other websites needs a small browser extension. It lives in the
+`extension` folder. With it installed, while a Task Starter timer is
+counting, every new page you open is paused unless it is Task Starter
+or one of the links you saved for the task.
+
+It is gentle on purpose:
+- The paused page offers "Back to Task Starter", "Allow this site for
+  this timer" and "Unlock all sites now".
+- The lock ends by itself when the timer ends or is paused, when you
+  close the Task Starter tab, when you restart the browser, and after
+  3 hours at most.
+- Tabs you already had open are never touched, so no work is lost.
+- It can be switched off in Task Starter's Settings ("Pause other
+  websites during the timer").
+
+### Install it (Chrome or Edge)
+
+1. Download this project and unzip it, if you haven't already.
+2. Open `chrome://extensions` (or `edge://extensions` in Edge).
+3. Turn on "Developer mode".
+4. Click "Load unpacked" and choose the `extension` folder.
+5. Reload the Task Starter page. Settings should now say the extension
+   is installed.
+
+Chrome will say the extension can "Read your browsing history". That is
+because it has to see the address of each page you open to decide
+whether to pause it. It never saves or sends those addresses anywhere.
+
+The extension works with the live site and with a copy served from
+`http://localhost`. It does not work when `index.html` is opened by
+double-clicking it. To put it in the Chrome Web Store you would need a
+developer account (a one-time $5 fee) and Google's review.
+
+### Extension files
+
+| File | What it holds |
+|------|---------------|
+| `manifest.json` | The extension's name, permissions and files |
+| `bridge.js` | Runs inside the Task Starter page and passes messages to the extension |
+| `background.js` | Decides which pages to pause, and ends the lock |
+| `blocked.html`, `blocked.js`, `blocked.css` | The "Paused while you focus" page |

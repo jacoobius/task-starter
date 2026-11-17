@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paused while you focus</title>
+  <link rel="stylesheet" href="blocked.css">
+</head>
+<body>
+  <!-- Shown instead of a website while a Task Starter timer runs.
+       blocked.js fills in the text. Nothing here is a failure: the
+       user can always go back, allow the site, or unlock. -->
+  <main>
+    <h1 id="heading" tabindex="-1">Paused while you focus</h1>
+    <p id="message"></p>
+    <p id="step" class="step" hidden></p>
+
+    <!-- While the timer runs -->
+    <div id="locked-buttons" class="buttons">
+      <button type="button" id="back" class="button button-primary">Back to Task Starter</button>
+      <button type="button" id="allow" class="button"></button>
+      <button type="button" id="unlock" class="button button-quiet">Unlock all sites now</button>
+    </div>
+
+    <!-- Once the timer has ended -->
+    <div id="free-buttons" class="buttons" hidden>
+      <button type="button" id="go" class="button button-primary"></button>
+    </div>
+
+    <p class="hint">Only new pages are paused. Tabs you already had open are left alone.</p>
+  </main>
+
+  <script src="blocked.js"></script>
+</body>
+</html>

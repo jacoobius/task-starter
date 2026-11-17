@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Task Starter Focus Lock",
+  "version": "1.0",
+  "description": "While a Task Starter timer runs, pauses every website except Task Starter and the links you saved for the task.",
+  "permissions": ["webNavigation", "storage", "alarms"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://jacoobius.github.io/task-starter/*",
+        "http://localhost/*"
+      ],
+      "js": ["bridge.js"]
+    }
+  ]
+}

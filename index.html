@@ -113,7 +113,7 @@
                    aria-describedby="link-hint">
             <button type="submit" class="button">Add link</button>
           </div>
-          <p id="link-hint" class="hint">Your links appear beside the timer, so the right page is one click away. This app cannot block other websites.</p>
+          <p id="link-hint" class="hint">Your links appear beside the timer, so the right page is one click away. With the Focus Lock extension, these sites stay open while others are paused.</p>
         </form>
 
         <ul id="link-list" class="link-list" aria-label="Links"></ul>
@@ -170,6 +170,8 @@
           <div id="timer-bar-fill" class="timer-bar-fill"></div>
         </div>
         <p id="timer-message" class="timer-message"></p>
+        <!-- Only while the extension is pausing other sites. -->
+        <p id="site-lock-note" class="hint" hidden>Other websites are paused until the timer ends. Your saved links still work, and tabs you already had open are left alone.</p>
         <!-- The companion keeps the user company while the timer runs. -->
         <canvas class="pet-canvas pet-small pet-bob timer-pet reward-only" data-pet="mine" aria-hidden="true"></canvas>
         <!-- What the companion is "doing" beside you, e.g. "Biscuit is
@@ -342,7 +344,14 @@
     <label class="check-label">
       <input type="checkbox" id="setting-focus-lock" aria-describedby="lock-hint"> Focus lock
     </label>
-    <p id="lock-hint" class="hint">Asks "are you sure?" before you leave a running timer or close this tab. It cannot block other websites.</p>
+    <p id="lock-hint" class="hint">Asks "are you sure?" before you leave a running timer or close this tab.</p>
+
+    <label class="check-label">
+      <input type="checkbox" id="setting-site-lock" aria-describedby="site-lock-hint extension-status"> Pause other websites during the timer
+    </label>
+    <p id="site-lock-hint" class="hint">Everything except Task Starter and your saved links waits until the timer ends. You can always unlock early.</p>
+    <!-- app.js says here whether the browser extension is installed. -->
+    <p id="extension-status" class="hint"></p>
 
     <fieldset>
       <legend>Backup</legend>

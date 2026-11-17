@@ -31,9 +31,40 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 16 | Animations (confetti, hops, egg wobble, screen fade), naming and patting the companion | done | claude/animations |
 | 17 | Timer extras: a bar that empties, quick length buttons, and a break timer | done | claude/timer-extras |
 | 19 | Staying power: welcome back, things you started, treasures, more varied lines, help with too-big steps, a planned treat, a working companion, background sound | done | claude/staying-power |
+| 20 | Focus Lock browser extension that pauses other sites during the timer | done | claude/extension |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 20, Focus Lock extension (Claude): Jacob asked again for the tab
+  lock. A website can't do it, so this is a Chrome/Edge extension in the
+  new extension folder, which the website talks to.
+  How it fits together: bridge.js runs inside the Task Starter page and
+  says "hello", so app.js knows the extension is there. When the
+  countdown starts or resumes, app.js sends "lock" with the end time and
+  the saved links' site names; when it stops for any reason it sends
+  "unlock" (both from startTicking() and stopTicking()). background.js
+  watches each new page load and, during a lock, sends any site that
+  isn't allowed to blocked.html ("Paused while you focus"), which offers
+  Back to Task Starter, Allow this site for this timer, and Unlock now.
+  Safety: the lock ends by itself at the timer's end, after 3 hours at
+  most, when the Task Starter tab closes and when the browser restarts.
+  Pages already open are never touched. Only the Task Starter page can
+  start a lock, and only blocked.html can allow sites.
+  Permission choice: blocking with Chrome's declarativeNetRequest
+  redirect would need access to "all your data on all websites", so
+  Claude used webNavigation instead (install warning: "Read your
+  browsing history"). The downside: a paused page may start loading for
+  a split second before it is replaced.
+  Settings has a new switch, "Pause other websites during the timer"
+  (on by default, does nothing without the extension), and shows
+  whether the extension is installed.
+  Checked: the website's messages by pretending to be the extension;
+  background.js against a fake version of Chrome's functions (allowed
+  and blocked sites, look-alike sites, sub-sites, who may send which
+  message, and every way a lock ends); blocked.html in both states.
+  NOT checked: the extension installed in a real browser. Claude cannot
+  install extensions, so Jacob needs to load it once and try it.
 
 - Task 19, staying power (Claude): Jacob asked what to do about rewards
   wearing off, then said to build whatever helps. (Task 18, the AI log,

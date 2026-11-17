@@ -44,6 +44,10 @@ features. The student (me) must be able to understand and explain all code.
   any new day (never "in a row"), varied messages, "This step feels too
   big", a user-planned treat, a companion that "works" beside the timer,
   and optional background sound.
+- Focus Lock browser extension (added 2026-11-17 at Jacob's request), in
+  the extension folder: pauses new page loads except Task Starter and the
+  task's links while a timer counts. It must always let the user unlock,
+  end by itself, and never touch tabs that were already open.
 
 ## Design rules
 - One main action per screen. Usable within 30 seconds of first opening.
@@ -63,8 +67,8 @@ features. The student (me) must be able to understand and explain all code.
 ## Do NOT build
 Accounts, cloud sync, notifications, AI features, mobile app.
 (Accounts and cloud sync need a server, which GitHub Pages does not have.
-A real lock on other browser tabs needs a browser extension, which would
-be a separate project. A web page cannot control other tabs.)
+A web page cannot control other tabs, so the tab lock is a separate
+browser extension in the extension folder; see "Around the core flow".)
 
 ## Working rules for ALL agents (Claude Code and Codex)
 - Read PLAN.md before starting. Pick only tasks marked "todo" and not

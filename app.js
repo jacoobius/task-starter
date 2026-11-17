@@ -22,6 +22,7 @@ const state = {
     rewards: true,    // show the companion, XP, badges, check mark and kind message
     plainMode: false, // true = all three above count as off
     focusLock: true,  // ask before leaving a running timer
+    siteLock: true,   // pause other websites during the timer (needs the extension)
     theme: "paper",   // color theme (an id from THEMES in rewards.js)
     largeText: false, // bigger text everywhere
     ambient: "off"    // background sound during the timer: "off", "brown" or "rain"
@@ -773,11 +774,13 @@ function startTicking() {
   timerEndTime = Date.now() + timerRemainingMs;
   timerInterval = setInterval(tick, 250);
   tick();
+  lockSites();   // only does something if the extension is installed
 }
 
 function stopTicking() {
   clearInterval(timerInterval);
   timerInterval = null;
+  unlockSites();
 }
 
 // Runs four times a second while the timer is counting.
@@ -962,6 +965,78 @@ window.addEventListener("beforeunload", function (event) {
     event.preventDefault();
   }
 });
+
+// ----- Site lock (needs the browser extension) -----
+// A web page can't control other tabs, so the real lock lives in the
+// "Task Starter Focus Lock" extension (the extension folder). If it is
+// installed, its bridge.js file says "hello" to this page. After that,
+// this page tells it when the timer starts and stops, and the extension
+// pauses every other website in between. Without the extension these
+// functions do nothing.
+let extensionReady = false;
+
+window.addEventListener("message", function (event) {
+  // Only messages from the extension's bridge, inside this same page.
+  if (event.source !== window || !event.data || event.data.source !== "task-starter-extension") {
+    return;
+  }
+  if (event.data.type === "hello") {
+    extensionReady = true;
+    showExtensionStatus();
+
+    // After a reload no timer is running, so lift any old lock.
+    if (timerInterval === null) {
+      unlockSites();
+    }
+  }
+});
+
+// Send a message to the extension (through bridge.js).
+function sendToExtension(message) {
+  if (!extensionReady) {
+    return;
+  }
+  message.source = "task-starter-page";
+  window.postMessage(message, window.location.origin);
+}
+
+// Pause other sites until the timer ends. The task's saved links stay
+// open; the extension always keeps Task Starter itself open too.
+function lockSites() {
+  const note = document.getElementById("site-lock-note");
+  if (!extensionReady || !state.settings.siteLock) {
+    note.hidden = true;
+    return;
+  }
+
+  const allowed = state.links.map(function (link) {
+    return new URL(link).hostname;   // e.g. "docs.google.com"
+  });
+  const step = findStep(currentStepId);
+
+  sendToExtension({
+    type: "lock",
+    allowed: allowed,
+    endsAt: timerEndTime,
+    step: step ? step.text : ""
+  });
+  note.hidden = false;
+}
+
+function unlockSites() {
+  sendToExtension({ type: "unlock" });
+  document.getElementById("site-lock-note").hidden = true;
+}
+
+// The line in Settings that says whether the extension is installed.
+function showExtensionStatus() {
+  const status = document.getElementById("extension-status");
+  if (extensionReady) {
+    status.textContent = "The Task Starter Focus Lock extension is installed in this browser.";
+  } else {
+    status.textContent = "This needs the Task Starter Focus Lock browser extension, which isn't installed in this browser. The README explains how to add it.";
+  }
+}
 
 function stopForNow() {
   const minutes = leaveTimer();
@@ -1341,6 +1416,7 @@ const SETTING_CHECKBOXES = {
   rewards: "setting-rewards",
   plainMode: "setting-plain",
   focusLock: "setting-focus-lock",
+  siteLock: "setting-site-lock",
   largeText: "setting-large-text"
 };
 
@@ -1368,6 +1444,16 @@ function applySettings() {
   showOrHideRewards();
   showChosenPet();
   refreshPets();
+
+  // If the site-lock switch changed while the timer is counting, apply
+  // it straight away.
+  if (timerInterval !== null) {
+    if (state.settings.siteLock) {
+      lockSites();
+    } else {
+      unlockSites();
+    }
+  }
 }
 
 // When a checkbox is ticked or unticked: remember it, save, and apply.
@@ -1524,6 +1610,7 @@ document.getElementById("welcome-fresh").addEventListener("click", function () {
 loadState();
 buildPetPicker();
 applySettings();
+showExtensionStatus();   // "not installed" until the extension says hello
 
 // If a task was saved earlier, skip screen 1 and carry on from the steps.
 if (state.task !== "") {
