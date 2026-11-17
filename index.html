@@ -125,13 +125,25 @@
         <label for="timer-minutes">How many minutes?</label>
         <input type="number" id="timer-minutes" min="1" max="120" value="10"
                aria-describedby="timer-hint">
-        <p id="timer-hint" class="hint">Between 1 and 120.</p>
+        <p id="timer-hint" class="hint">Between 1 and 120. Or pick one:</p>
+        <!-- Quick lengths. data-minutes is read by app.js. -->
+        <div class="button-row preset-row" role="group" aria-label="Quick lengths">
+          <button type="button" class="button button-small timer-preset" data-minutes="5">5 min</button>
+          <button type="button" class="button button-small timer-preset" data-minutes="10">10 min</button>
+          <button type="button" class="button button-small timer-preset" data-minutes="15">15 min</button>
+          <button type="button" class="button button-small timer-preset" data-minutes="25">25 min</button>
+        </div>
         <button type="submit" class="button button-primary">Start timer</button>
       </form>
 
       <!-- Part B: the countdown. Replaces part A once the timer starts. -->
       <div id="timer-running" hidden>
         <p id="timer-display" class="timer-display" role="timer" aria-label="Time left">10:00</p>
+        <!-- A bar that empties as time passes: the time left as a
+             picture. It repeats the numbers, so screen readers skip it. -->
+        <div class="timer-bar" aria-hidden="true">
+          <div id="timer-bar-fill" class="timer-bar-fill"></div>
+        </div>
         <p id="timer-message" class="timer-message"></p>
         <!-- The companion keeps the user company while the timer runs. -->
         <canvas class="pet-canvas pet-small pet-bob timer-pet reward-only" data-pet="mine" aria-hidden="true"></canvas>
@@ -174,8 +186,13 @@
       <!-- The bar repeats the sentence above, so screen readers skip it. -->
       <progress id="done-bar" class="progress-bar" max="1" value="0" aria-hidden="true"></progress>
 
+      <!-- Break countdown, e.g. "Break: 4:32 left". Hidden until a
+           break is started. -->
+      <p id="break-text" class="break-text" hidden></p>
+
       <div class="button-row">
         <button type="button" id="done-next" class="button button-primary"></button>
+        <button type="button" id="break-start" class="button">Take a 5-minute break first</button>
         <button type="button" id="done-back" class="button button-quiet">Back to steps</button>
       </div>
     </section>

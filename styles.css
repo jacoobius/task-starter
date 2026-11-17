@@ -366,6 +366,34 @@ input[type="number"] {
   text-align: center;
 }
 
+/* The bar under the countdown. The inner part gets narrower as time
+   runs out; app.js sets its width. */
+.timer-bar {
+  height: 0.75rem;
+  margin-bottom: var(--space-medium);
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.timer-bar-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--color-accent);
+  transition: width 250ms linear;
+}
+
+.preset-row {
+  margin: var(--space-small) 0 0;
+}
+
+/* "Break: 4:32 left" on the step-done screen. */
+.break-text {
+  margin: var(--space-large) 0 0;
+  font-weight: 600;
+}
+
 /* A group of buttons. The primary one takes a full row of its own. */
 .button-row {
   display: flex;
@@ -456,6 +484,7 @@ dialog h2 {
 }
 
 fieldset {
+  min-width: 0;   /* lets the box shrink on a narrow screen instead of sticking out */
   margin: 0 0 var(--space-medium);
   padding: var(--space-small) var(--space-medium);
   border: 2px solid var(--color-border);
@@ -778,10 +807,18 @@ h2 {
   margin: 0 0 var(--space-small);
 }
 
-/* Choosing a companion in Settings: three per row. */
+/* On a narrow screen, give the pop-ups less padding so more fits. */
+@media (max-width: 30rem) {
+  dialog {
+    padding: var(--space-medium);
+  }
+}
+
+/* Choosing a companion in Settings. */
 .pet-choices {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* As many columns as fit: three on a wide screen, two on a phone. */
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
   gap: var(--space-small);
 }
 

@@ -32,6 +32,13 @@ features. The student (me) must be able to understand and explain all code.
 - Links for the task, shown beside the timer, and a "focus lock" that
   asks before the user leaves a running timer.
 - A backup file (save/load) in place of accounts.
+- Color themes (Paper and Night are free; others unlock by level) and a
+  larger-text setting.
+- Long-term progression: a fully grown companion joins the "family" and a
+  new egg starts. Nothing is ever lost when that happens.
+- Animations (confetti, hops, fades). All of them must stay off when the
+  animation setting is off, in plain mode, or under reduced motion.
+- Timer extras: a bar that empties, quick-length buttons, a break timer.
 
 ## Design rules
 - One main action per screen. Usable within 30 seconds of first opening.

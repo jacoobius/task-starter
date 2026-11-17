@@ -29,10 +29,28 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 14 | Color themes (some unlock with levels) and a larger-text setting | done | claude/themes |
 | 15 | Longer progression: each companion grows on its own, grown ones join a family, new eggs, more badges | done | claude/progression |
 | 16 | Animations (confetti, hops, egg wobble, screen fade), naming and patting the companion | done | claude/animations |
-| 17 | Timer extras: a bar that empties, quick length buttons, and a break timer | in progress (Claude) | claude/timer-extras |
+| 17 | Timer extras: a bar that empties, quick length buttons, and a break timer | done | claude/timer-extras |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 17, timer extras (Claude): three small additions around the timer.
+  (1) A bar under the countdown that empties as time passes. People with
+  ADHD often find it hard to feel how much time is left from numbers
+  alone, and a shrinking bar shows it at a glance. tick() sets its width
+  as a percentage of the full time.
+  (2) Quick-length buttons (5, 10, 15, 25 minutes) that fill in the
+  minutes box.
+  (3) "Take a 5-minute break first" on the "step done" screen. It is a
+  second, very simple countdown with its own variables. It earns nothing
+  and nothing happens if it is skipped. formatTime() was split out of
+  showTime() so both countdowns share it.
+  Checked by script in the preview for tasks 14 to 17: theme contrast,
+  theme locking, the old-save migration, growing up and hatching a new
+  egg, confetti on and off, naming, patting, the bar, the presets, the
+  break, and no sideways scroll at 320px. NOT checked: a screen reader,
+  the device's reduced-motion setting, and browsers other than the
+  preview one.
 
 - Task 16, animations, name and pats (Claude): all the movement is CSS
   animation in styles.css; the JavaScript only adds or removes a class.

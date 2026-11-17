@@ -639,6 +639,14 @@ timerSetup.addEventListener("submit", function (event) {
   announce("Timer started: " + minutes + " minutes.");
 });
 
+// The quick-length buttons ("5 min", "10 min"...) fill in the box.
+document.querySelectorAll(".timer-preset").forEach(function (button) {
+  button.addEventListener("click", function () {
+    timerMinutesInput.value = button.dataset.minutes;   // from data-minutes in index.html
+    announce(button.dataset.minutes + " minutes chosen.");
+  });
+});
+
 // Switch to part B and start counting down from state.timerMinutes.
 function startCountdown() {
   timerRemainingMs = state.timerMinutes * 60 * 1000;
@@ -676,19 +684,27 @@ function tick() {
   timerRemainingMs = Math.max(0, timerEndTime - Date.now());
   showTime(timerRemainingMs);
 
+  // The bar: what share of the full time is left, as a percentage.
+  const fullMs = state.timerMinutes * 60 * 1000;
+  document.getElementById("timer-bar-fill").style.width = (timerRemainingMs / fullMs * 100) + "%";
+
   if (timerRemainingMs === 0) {
     timeIsUp();
   }
 }
 
-// Show milliseconds as minutes:seconds, e.g. 9:05.
-// The time also goes in the browser tab title, so it stays visible
-// when the user is looking at another tab.
-function showTime(ms) {
+// Turn milliseconds into text like "9:05" (minutes:seconds).
+function formatTime(ms) {
   const totalSeconds = Math.ceil(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  const text = minutes + ":" + String(seconds).padStart(2, "0");
+  return minutes + ":" + String(seconds).padStart(2, "0");
+}
+
+// Show the time left. It also goes in the browser tab title, so it
+// stays visible when the user is looking at another tab.
+function showTime(ms) {
+  const text = formatTime(ms);
 
   timerDisplay.textContent = text;
   document.title = text + " - " + APP_TITLE;
@@ -875,6 +891,7 @@ function progressText() {
 // just earned and whether anything new happened.
 function openDoneScreen(reward) {
   showReward(reward);
+  resetBreak();
 
   const doneCount = countDone();
   const step = nextStep();   // undefined when every step is done
@@ -931,6 +948,7 @@ function showOrHideRewards() {
 }
 
 document.getElementById("done-next").addEventListener("click", function () {
+  stopBreak();
   const step = nextStep();
 
   if (step) {
@@ -947,7 +965,63 @@ document.getElementById("done-next").addEventListener("click", function () {
   }
 });
 
-document.getElementById("done-back").addEventListener("click", openStepsScreen);
+document.getElementById("done-back").addEventListener("click", function () {
+  stopBreak();
+  openStepsScreen();
+});
+
+// ----- Break timer -----
+// A short, optional rest between steps. It is a second, much simpler
+// countdown that lives on the "step done" screen. It earns no XP and
+// nothing happens if it is skipped or cut short.
+const BREAK_MINUTES = 5;
+
+const breakStartButton = document.getElementById("break-start");
+const breakText = document.getElementById("break-text");
+
+let breakEndTime = 0;       // the clock time (in ms) when the break ends
+let breakInterval = null;   // the repeating tick, or null when no break is running
+
+breakStartButton.addEventListener("click", function () {
+  breakEndTime = Date.now() + BREAK_MINUTES * 60 * 1000;
+
+  breakStartButton.hidden = true;
+  breakText.hidden = false;
+  breakInterval = setInterval(breakTick, 500);
+  breakTick();
+
+  // The button that was clicked has just been hidden, so move keyboard
+  // focus to the next-step button.
+  document.getElementById("done-next").focus();
+  announce("Break started: " + BREAK_MINUTES + " minutes.");
+});
+
+// Runs twice a second during a break.
+function breakTick() {
+  const ms = Math.max(0, breakEndTime - Date.now());
+
+  if (ms === 0) {
+    stopBreak();
+    breakText.textContent = "Break's over. Ready when you are.";
+    announce("Break's over.");
+    playChime();
+  } else {
+    breakText.textContent = "Break: " + formatTime(ms) + " left";
+  }
+}
+
+function stopBreak() {
+  clearInterval(breakInterval);
+  breakInterval = null;
+}
+
+// Put the break controls back to how they start. Runs each time the
+// "step done" screen opens.
+function resetBreak() {
+  stopBreak();
+  breakStartButton.hidden = false;
+  breakText.hidden = true;
+}
 
 // ----- Sound -----
 // The chime is two short notes made by the browser itself (the Web
