@@ -96,14 +96,13 @@ function isBlockedPage(address) {
 
 // ==========================================================
 // PAUSING PAGES
-// webNavigation tells us just before any tab starts loading a page.
+// Pages can arrive in a tab in more than one way, so three events are
+// watched. Each one calls checkPage().
 // ==========================================================
-chrome.webNavigation.onBeforeNavigate.addListener(async function (details) {
-  // Only whole pages in real tabs; not frames inside a page.
-  if (details.frameId !== 0 || details.tabId < 0) {
-    return;
-  }
 
+// Decide about one page in one tab, and show blocked.html instead if
+// it isn't allowed right now.
+async function checkPage(tabId, address) {
   const lock = await currentLock();
   if (!lock) {
     return;
@@ -111,13 +110,13 @@ chrome.webNavigation.onBeforeNavigate.addListener(async function (details) {
 
   let url;
   try {
-    url = new URL(details.url);
+    url = new URL(address);
   } catch (error) {
     return;
   }
 
-  // Only ordinary websites. Browser pages (settings, new tab, this
-  // extension's own pages) are always left alone.
+  // Only ordinary websites. Browser pages (settings, the new-tab page,
+  // this extension's own pages) are always left alone.
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     return;
   }
@@ -129,8 +128,51 @@ chrome.webNavigation.onBeforeNavigate.addListener(async function (details) {
   // full address go along, so blocked.html can offer to allow it.
   const page = chrome.runtime.getURL("blocked.html") +
     "?site=" + encodeURIComponent(url.hostname) +
-    "&from=" + encodeURIComponent(details.url);
-  chrome.tabs.update(details.tabId, { url: page });
+    "&from=" + encodeURIComponent(address);
+  try {
+    await chrome.tabs.update(tabId, { url: page });
+  } catch (error) {
+    // The tab has gone (closed, or replaced while this was running).
+  }
+}
+
+// Is this event about a whole page in a tab the user can see?
+// frameId 0 = the page itself, not a frame inside it. A "prerender" is
+// a hidden copy Chrome loads early while you type an address; it is
+// not a real tab yet, so it is checked when it is swapped in (below).
+function isVisiblePage(details) {
+  return details.frameId === 0 && details.tabId >= 0 &&
+    details.documentLifecycle !== "prerender";
+}
+
+// 1. Just before a tab starts loading a page: the quickest check.
+chrome.webNavigation.onBeforeNavigate.addListener(function (details) {
+  if (isVisiblePage(details)) {
+    checkPage(details.tabId, details.url);
+  }
+});
+
+// 2. When a page has actually arrived in a tab. This catches what the
+// first check can miss: redirects to another site, and pages brought
+// back with the Back and Forward buttons.
+chrome.webNavigation.onCommitted.addListener(function (details) {
+  if (isVisiblePage(details)) {
+    checkPage(details.tabId, details.url);
+  }
+});
+
+// 3. When Chrome swaps a preloaded (prerendered) page into a tab, for
+// example after typing an address into a new tab and pressing Enter.
+// No loading event happens then, so ask what the tab now shows.
+chrome.webNavigation.onTabReplaced.addListener(async function (details) {
+  try {
+    const frame = await chrome.webNavigation.getFrame({ tabId: details.tabId, frameId: 0 });
+    if (frame) {
+      checkPage(details.tabId, frame.url);
+    }
+  } catch (error) {
+    // The tab has already gone.
+  }
 });
 
 // ==========================================================

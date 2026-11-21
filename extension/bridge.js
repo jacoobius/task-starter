@@ -30,10 +30,22 @@ window.addEventListener("message", function (event) {
     step: data.step
   };
 
+  // Send it, then tell the page whether the extension accepted it, as
+  // "lock-result" or "unlock-result". The page uses this to show
+  // "Other websites are paused" only when that is really true.
   try {
-    chrome.runtime.sendMessage(message);
+    chrome.runtime.sendMessage(message).then(function (answer) {
+      tellPage(message.type + "-result", Boolean(answer && answer.ok));
+    }).catch(function () {
+      tellPage(message.type + "-result", false);
+    });
   } catch (error) {
     // The extension was reloaded or removed while this page was open.
-    // Nothing to do: reloading the page connects it again.
+    // Reloading the page connects it again.
+    tellPage(message.type + "-result", false);
   }
 });
+
+function tellPage(type, ok) {
+  window.postMessage({ source: "task-starter-extension", type: type, ok: ok }, window.location.origin);
+}

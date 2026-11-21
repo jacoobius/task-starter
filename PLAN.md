@@ -33,9 +33,28 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 19 | Staying power: welcome back, things you started, treasures, more varied lines, help with too-big steps, a planned treat, a working companion, background sound | done | claude/staying-power |
 | 20 | Focus Lock browser extension that pauses other sites during the timer | done | claude/extension |
 | 21 | Stop browsers mixing old and new files after an update | done | claude/cache-fix |
+| 22 | Fix the Focus Lock letting some pages through | done | claude/extension-fix |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 22, Focus Lock fix (Claude): Jacob found that the extension still
+  let pages open in a new tab. Likely cause, from Chrome's docs: while
+  you type an address, Chrome often loads the page early in a hidden
+  "prerender" tab, then swaps it in when you press Enter. The extension
+  only checked the moment a tab starts loading, which a swapped-in page
+  never does. background.js now checks a page in three ways, all through
+  one function, checkPage(): just before it loads, when it has actually
+  arrived (this also catches redirects and the Back button), and when a
+  preloaded page is swapped in. Hidden prerenders are skipped until they
+  are swapped in.
+  The website now shows "Other websites are paused" only after the
+  extension answers that the lock is on (bridge.js passes the answer
+  back as "lock-result"), so it is easy to see whether it is working.
+  Extension version is now 1.1; file links are now ?v=21. The README has
+  a short troubleshooting list. Checked against a fake version of
+  Chrome's functions. NOT checked in a real browser: Jacob needs to
+  reload the extension and try typing a site into a new tab again.
 
 - Task 21, cache fix (Claude): after publishing task 20, the live site
   loaded the new index.html with an old, saved copy of app.js. Browsers

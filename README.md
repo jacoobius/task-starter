@@ -84,6 +84,23 @@ The extension works with the live site and with a copy served from
 double-clicking it. To put it in the Chrome Web Store you would need a
 developer account (a one-time $5 fee) and Google's review.
 
+### If it doesn't seem to work
+
+1. **After an update, reload it.** On `chrome://extensions`, press the
+   circular reload arrow on "Task Starter Focus Lock", then reload the
+   Task Starter page.
+2. **Check Settings.** It should say the extension is installed. If it
+   doesn't, the page was opened before the extension was loaded: reload
+   the page.
+3. **Start the countdown.** The lock begins only when you press "Start
+   timer", not when the timer screen opens. While it is on, the timer
+   screen says "Other websites are paused until the timer ends". That
+   line appears only after the extension confirms the lock.
+4. **New tabs themselves are allowed.** Opening a new, empty tab is
+   fine; the site you then go to in it is what gets paused.
+5. **Look for errors.** On `chrome://extensions`, an "Errors" button on
+   the extension's card lists anything that went wrong.
+
 ### Extension files
 
 | File | What it holds |

@@ -989,6 +989,13 @@ window.addEventListener("message", function (event) {
       unlockSites();
     }
   }
+
+  // The extension's answer to "lock". Only now is it certain that other
+  // sites are paused, so only now is the note shown. If the timer has
+  // stopped in the meantime, the note stays hidden.
+  if (event.data.type === "lock-result") {
+    document.getElementById("site-lock-note").hidden = !(event.data.ok && timerInterval !== null);
+  }
 });
 
 // Send a message to the extension (through bridge.js).
@@ -1020,7 +1027,7 @@ function lockSites() {
     endsAt: timerEndTime,
     step: step ? step.text : ""
   });
-  note.hidden = false;
+  // The note appears when the extension answers "lock-result" (above).
 }
 
 function unlockSites() {
