@@ -34,9 +34,25 @@ Shared task list for all agents (Claude Code and Codex). Rules are in AGENTS.md.
 | 20 | Focus Lock browser extension that pauses other sites during the timer | done | claude/extension |
 | 21 | Stop browsers mixing old and new files after an update | done | claude/cache-fix |
 | 22 | Fix the Focus Lock letting some pages through | done | claude/extension-fix |
+| 23 | Install guide and download for the Focus Lock extension | done | claude/install-guide |
 
 ## Notes
 (Newest first. One short entry per finished task: what changed and why.)
+
+- Task 23, install guide (Claude): Jacob asked for the steps and files
+  needed to install the extension. Added a download,
+  downloads/task-starter-focus-lock.zip (a zipped copy of the extension
+  folder, about 8 KB), and a new page, install.html, on the live site:
+  what you need, 7 install steps, how to check it works, what the
+  permission warning means, updating, removing, and a table of the
+  files. It uses the app's styles.css and the user's saved theme.
+  Settings now links to it. The README points there too, and has the
+  command to rebuild the zip; AGENTS.md now says to rebuild it after any
+  extension change. File links are now ?v=22.
+  Checked: the page, the download (200, 7763 bytes, six files inside)
+  and the Settings link in the preview. Jacob already confirmed on
+  2026-11-20 that the extension connects ("Other websites are paused"
+  appeared). NOT checked: installing from the zip itself.
 
 - Task 22, Focus Lock fix (Claude): Jacob found that the extension still
   let pages open in a new tab. Likely cause, from Chrome's docs: while

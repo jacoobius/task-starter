@@ -1006,7 +1006,53 @@ fieldset .button-row {
 }
 
 /* ==========================================================
-   12. MOTION OFF
+   12. INSTALL PAGE (install.html)
+   ========================================================== */
+.install-page h2 {
+  margin-top: var(--space-large);
+}
+
+.install-steps li {
+  margin-bottom: var(--space-small);
+}
+
+.install-page .plain-list li {
+  margin-bottom: var(--space-small);
+}
+
+/* A link that looks like the main button. */
+a.install-download {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+}
+
+code {
+  padding: 0 0.25em;
+  font-size: 0.95em;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.file-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-small);
+}
+
+.file-table th,
+.file-table td {
+  padding: var(--space-small);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ==========================================================
+   13. MOTION OFF
    Animations and transitions are switched off everywhere when
    (a) the user's device asks for less motion, or
    (b) the user turned animation off in Settings. app.js then adds

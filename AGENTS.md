@@ -18,7 +18,11 @@ features. The student (me) must be able to understand and explain all code.
 - Must run by opening index.html or a simple static server.
 - Hosted as a static website on GitHub Pages (see README.md).
 - When styles.css or any .js file changes, raise the "?v=" number on all
-  four file links in index.html, so browsers don't mix old and new files.
+  four file links in index.html (and on styles.css in install.html), so
+  browsers don't mix old and new files.
+- After any change in the extension folder, rebuild
+  downloads/task-starter-focus-lock.zip (command in README.md) and raise
+  the version in extension/manifest.json.
 
 ## Core flow (build only this)
 1. User types one task they're avoiding.

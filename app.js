@@ -1041,7 +1041,7 @@ function showExtensionStatus() {
   if (extensionReady) {
     status.textContent = "The Task Starter Focus Lock extension is installed in this browser.";
   } else {
-    status.textContent = "This needs the Task Starter Focus Lock browser extension, which isn't installed in this browser. The README explains how to add it.";
+    status.textContent = "This needs the Task Starter Focus Lock browser extension, which isn't installed in this browser.";
   }
 }
 

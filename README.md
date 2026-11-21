@@ -68,12 +68,26 @@ It is gentle on purpose:
 
 ### Install it (Chrome or Edge)
 
-1. Download this project and unzip it, if you haven't already.
+The full step-by-step guide is on the site:
+https://jacoobius.github.io/task-starter/install.html (also linked from
+Settings). In short:
+
+1. Download `downloads/task-starter-focus-lock.zip` (the guide has a
+   button) and unzip it into a folder that can stay put.
 2. Open `chrome://extensions` (or `edge://extensions` in Edge).
 3. Turn on "Developer mode".
-4. Click "Load unpacked" and choose the `extension` folder.
+4. Click "Load unpacked" and choose the unzipped folder, the one with
+   `manifest.json` directly inside it. (From a copy of this project, the
+   `extension` folder works too.)
 5. Reload the Task Starter page. Settings should now say the extension
    is installed.
+
+The zip is a copy of the `extension` folder. After changing anything in
+`extension`, rebuild it (in PowerShell, from the project folder):
+
+```
+Compress-Archive -Path extension\* -DestinationPath downloads\task-starter-focus-lock.zip -Force
+```
 
 Chrome will say the extension can "Read your browsing history". That is
 because it has to see the address of each page you open to decide

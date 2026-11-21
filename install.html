@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How to install the Task Starter Focus Lock browser extension.">
+  <title>Install the Focus Lock - Task Starter</title>
+  <!-- Same styles as the app. "?v=" works as in index.html. -->
+  <link rel="stylesheet" href="styles.css?v=22">
+  <script>
+    // Use the same color theme as the app, if one is saved. This only
+    // reads the saved settings; it never changes them.
+    try {
+      const saved = JSON.parse(localStorage.getItem("task-starter"));
+      if (saved && saved.settings && saved.settings.theme) {
+        document.documentElement.dataset.theme = saved.settings.theme;
+      }
+      if (saved && saved.settings && saved.settings.largeText) {
+        document.documentElement.dataset.text = "large";
+      }
+    } catch (error) {
+      // Nothing saved, or storage is blocked: the default theme is fine.
+    }
+  </script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <p class="app-name">Task Starter</p>
+    <a class="button button-quiet" href="./">Back to Task Starter</a>
+  </header>
+
+  <main id="main" class="install-page">
+    <h1>Install the Focus Lock extension</h1>
+
+    <p>A website isn't allowed to control other browser tabs. The Focus Lock is a small browser extension that does it for Task Starter: while your timer is counting, it pauses every new page except Task Starter and the links you saved for your task.</p>
+
+    <p class="notice">It is optional. Task Starter works fully without it. It works in Google Chrome and Microsoft Edge on a computer, not on phones.</p>
+
+    <h2>What you need</h2>
+    <ul class="plain-list">
+      <li>Google Chrome or Microsoft Edge on a Windows, Mac or ChromeOS computer.</li>
+      <li>A browser profile you control. School or work browsers often block this kind of install. If step 5 is greyed out, that is why.</li>
+      <li>The download below (6 small files in one zip, about 8 KB).</li>
+    </ul>
+
+    <p><a class="button button-primary install-download" href="downloads/task-starter-focus-lock.zip" download>Download the Focus Lock (zip)</a></p>
+
+    <h2>Install it (about 2 minutes)</h2>
+    <ol class="install-steps">
+      <li><strong>Download</strong> the zip above.</li>
+      <li><strong>Unzip it.</strong> On Windows, right-click the file and choose "Extract All". On a Mac, double-click it. You get a folder called <code>task-starter-focus-lock</code>.</li>
+      <li><strong>Move that folder somewhere it can stay</strong>, such as your Documents folder. The browser runs the extension from this folder, so don't delete it afterwards.</li>
+      <li><strong>Open the extensions page.</strong> Type <code>chrome://extensions</code> into the address bar (in Edge: <code>edge://extensions</code>) and press Enter. Websites can't link to this page, so it has to be typed.</li>
+      <li><strong>Turn on "Developer mode".</strong> It's a switch in the top-right corner in Chrome, or on the left in Edge.</li>
+      <li><strong>Click "Load unpacked"</strong> and choose the <code>task-starter-focus-lock</code> folder: the one that has <code>manifest.json</code> directly inside it.</li>
+      <li><strong>Reload Task Starter.</strong> Open Settings: under "Pause other websites during the timer" it should say the extension is installed.</li>
+    </ol>
+
+    <h2>Check it works</h2>
+    <ol class="install-steps">
+      <li>Start a step and press <strong>Start timer</strong>.</li>
+      <li>Under the countdown, look for: "Other websites are paused until the timer ends". That line only appears once the extension has confirmed the lock.</li>
+      <li>Open a new tab, type a site you didn't save as a link, and press Enter. You should see "Paused while you focus".</li>
+    </ol>
+
+    <h2>Good to know</h2>
+    <ul class="plain-list">
+      <li><strong>The warning.</strong> The browser says the extension can "Read your browsing history". It needs to see the address of each page you open to decide whether to pause it. It never saves or sends those addresses anywhere.</li>
+      <li><strong>You're never stuck.</strong> The paused page always has "Unlock all sites now". The lock also ends by itself when the timer ends or is paused, when you close the Task Starter tab, when you restart the browser, and after 3 hours at most.</li>
+      <li><strong>Open tabs are left alone.</strong> Tabs that were already open before the timer started keep working, so nothing you were doing is lost.</li>
+      <li><strong>Turn it off any time</strong> in Task Starter's Settings ("Pause other websites during the timer"), without uninstalling.</li>
+      <li><strong>Updating.</strong> Download the zip again, replace the files in your folder, then press the circular reload arrow on the extension's card on the extensions page.</li>
+      <li><strong>Removing.</strong> Click "Remove" on the extension's card. You can then delete the folder.</li>
+    </ul>
+
+    <h2>The files in the zip</h2>
+    <table class="file-table">
+      <thead>
+        <tr><th scope="col">File</th><th scope="col">What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>manifest.json</code></td><td>The extension's name, version, permissions and list of files</td></tr>
+        <tr><td><code>bridge.js</code></td><td>Runs inside the Task Starter page and passes "lock" and "unlock" messages to the extension</td></tr>
+        <tr><td><code>background.js</code></td><td>Decides which pages to pause, and ends the lock</td></tr>
+        <tr><td><code>blocked.html</code>, <code>blocked.js</code>, <code>blocked.css</code></td><td>The "Paused while you focus" page</td></tr>
+      </tbody>
+    </table>
+
+    <p><a class="button" href="./">Back to Task Starter</a></p>
+  </main>
+</body>
+</html>
